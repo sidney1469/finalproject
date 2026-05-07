@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Project Wiki | Timeline</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>Project Wiki</h1>
+      <p class="subtitle">Timeline and progress snapshots</p>
+      <nav>
+        <a href="timeline.html" aria-current="page">Timeline</a>
+        <a href="documentation.html">Documentation</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="panel">
+        <h2>How To Use This Page</h2>
+        <p>
+          Add one timeline card per significant update. Keep entries brief and include date, owner,
+          summary, and links to relevant files/commits.
+        </p>
+      </section>
+
+      <section class="panel">
+        <h2>Timeline Entries</h2>
+
+        <!-- TEMPLATE START: Duplicate this entire article block for each new dated update -->
+        <article class="timeline-entry">
+          <div class="timeline-date">
+            <time datetime="YYYY-MM-DD">YYYY-MM-DD</time>
+          </div>
+          <div class="timeline-content">
+            <h3>Milestone / Update Title</h3>
+            <p><strong>Owner:</strong> Name or team</p>
+            <p><strong>Summary:</strong> Describe what changed and why it matters.</p>
+            <ul>
+              <li><strong>Files touched:</strong> Add key paths here</li>
+              <li><strong>Issue/Task:</strong> Add ID or link</li>
+              <li><strong>Notes:</strong> Add decisions/risks/follow-up items</li>
+            </ul>
+          </div>
+        </article>
+        <!-- TEMPLATE END -->
+
+        <!-- EXAMPLE PLACEHOLDER: Keep or delete -->
+        <article class="timeline-entry placeholder">
+          <div class="timeline-date">
+            <time datetime="2026-05-06">2026-05-06</time>
+          </div>
+          <div class="timeline-content">
+            <h3>Project wiki template created</h3>
+            <p><strong>Owner:</strong> Team</p>
+            <p><strong>Summary:</strong> Initial timeline and documentation pages added.</p>
+          </div>
+        </article>
+
+        <article class="timeline-entry">
+          <div class="timeline-date">
+            <time datetime="YYYY-MM-DD">2026-05-06</time>
+          </div>
+          <div class="timeline-content">
+            <h3>Milestone / Initial Project Ideation</h3>
+            <p><strong>Owner:</strong> Wheat weywot</p>
+            <p><strong>Summary:</strong> Thought of an idea</p>
+            <ul>
+              <li><strong>Files touched:</strong> documentation.html, timeline.html, styles.css</li>
+              <li><strong>Issue/Task:</strong> Came up with project idea</li>
+              <li>
+                <strong>Notes:</strong> Decided to do an aircraft tracking application that will
+                point a servo at a plane of our choosing from a web dashboard
+              </li>
+            </ul>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <small>Project Wiki Template</small>
+    </footer>
+  </body>
+</html>
