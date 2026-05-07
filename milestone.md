@@ -67,3 +67,110 @@ Aircraft movement patterns
 System autonomously points to aircraft of interest
 
 Enables situational awareness and spatial understanding
+
+# Project Roles
+
+## Base Node
+
+1. Create BLE central for connection with Receiver node
+2. Create BLE central for connection with Actuator node
+3. Parse incoming BLE aircraft data stream
+4. Maintain in-memory aircraft state database
+5. Implement Kalman filter for aircraft position smoothing
+6. Compute relative geometry (bearing, distance, optional elevation)
+7. Allow aircraft selection input from PC dashboard
+8. Track selected aircraft state continuously
+9. Calculate servo angle / direction to target aircraft
+10. Send control commands to actuator node via BLE
+11. Manage system state (current target, tracking status)
+
+## Receiver Node
+
+1. ADS-B decode using RTL-SDR (RTL2832U pipeline)
+2. Extract aircraft fields (ICAO, lat, lon, alt, speed, heading)
+3. Apply lightweight filtering (remove invalid / duplicate messages)
+4. Limit aircraft dataset (e.g. top N by signal strength or proximity)
+5. SAM-M8Q GPS driver integration (position + time sync)
+6. Format aircraft data into BLE-ready packets (JSON or binary struct)
+7. Create BLE peripheral (NUS or custom GATT service)
+8. Broadcast aircraft updates at fixed interval (e.g. 1 Hz)
+9. Handle BLE connection stability and packet timing
+
+## Actuator Node
+
+1. Create BLE peripheral (control interface)
+2. Define BLE service for receiving actuator commands
+3. Parse incoming control packets (angle / direction)
+4. Implement servo PWM driver
+5. Smooth servo movement (rate limiting / interpolation)
+6. Add fail-safe behaviour on BLE disconnect
+7. Clamp servo limits to safe mechanical range
+8. Optional: status feedback (current angle / health)
+
+## Dashboard
+1. Build web dashboard UI (map-based aircraft display)
+2. Visualise real-time aircraft positions
+3. Display selected target aircraft tracking path
+4. Connect to Base Node (BLE or WebSocket interface)
+5. Allow user selection of target aircraft
+6. Send selected aircraft ID to Base Node
+7. Store historical aircraft data (optional logging system)
+8. Display system debug info (Kalman output, signal quality)
+9. Show connection status of all nodes
+10. Optional: playback mode for recorded flights
+
+## Xander — Radio + Data Handling
+### Phase 1:
+1. ADS-B decode using RTL-SDR (RTL2832U pipeline)
+2. Extract aircraft fields (ICAO, lat, lon, alt, speed, heading)
+### Phase 2:
+3. Apply lightweight filtering (remove invalid / duplicate messages)
+4. Limit aircraft dataset (e.g. top N by signal strength or proximity)
+### Phase 3:
+5. SAM-M8Q GPS driver integration (position + time sync)
+6. Format aircraft data into BLE-ready packets (JSON or binary struct)
+### Phase 4:
+7. Create BLE peripheral (NUS or custom GATT service)
+8. Broadcast aircraft updates at fixed interval (e.g. 1 Hz)
+9. Handle BLE connection stability and packet timing
+
+## Fiachra — Core Intelligence + Control (Base Node)
+### Phase 1:
+1. Create BLE central for connection with Receiver node
+2. Parse incoming BLE aircraft data stream
+3. Maintain in-memory aircraft state database
+### Phase 2:
+4. Implement Kalman filter for aircraft position smoothing
+5. Compute relative geometry (bearing, distance, optional elevation)
+6. Track selected aircraft state continuously
+### Phase 3:
+7. Allow aircraft selection input from PC dashboard
+8. Calculate servo angle / direction to target aircraft
+9. Send control commands to actuator node via BLE
+10. Manage system state (current target, tracking status)
+### Phase 4:
+11. Create BLE central for connection with Actuator node
+
+## Sidney — Dashboard + Actuation + Integration
+### Phase 1:
+1. Create BLE peripheral (control interface)
+2. Define BLE service for receiving actuator commands
+3. Parse incoming control packets (angle / direction)
+### Phase 2:
+4. Implement servo PWM driver
+5. Clamp servo limits to safe mechanical range
+6. Smooth servo movement (rate limiting / interpolation)
+7. Add fail-safe behaviour on BLE disconnect
+8. Optional: status feedback (current angle / health)
+### Phase 3:
+9. Build web dashboard UI (map-based aircraft display)
+10. Visualise real-time aircraft positions
+11. Show connection status of all nodes
+### Phase 4:
+12. Allow user selection of target aircraft
+13. Send selected aircraft ID to Base Node
+14. Display selected target aircraft tracking path
+### Phase 5:
+15. Display system debug info (Kalman output, signal quality)
+16. Store historical aircraft data (optional logging system)
+17. Playback mode for recorded flights
