@@ -1,30 +1,6 @@
-# Project Title
+# Wheat Weywot | Tracking Aircraft for a Sustainable future for Brisbane
 
-Wheat Weywot | Tracking Aircraft for a Sustainable future for Brisbane
-
-# Team Member List and Roles
-
-## Xander — Wheat Wallaby
-
-### Sensors + Data Handling (Sensor Node)
-
-Xander will focus on embedded code for the Sensor Node, as well as python code for the Raspberry Pi sensor controller. This will require establishing a BLE peripheral connection with the Base Node, and forming packets of plane data to send. The Raspberry Pi will be set up as a sensor controller for the RTL2832U, piping incoming data to the node over UART serial. Data will be decoded, filtered, sorted and packaged to .json. A zephyr driver will be created for the SAM-M8Q GPS module, and gps data will be sent to the Base Node when required. The Node will ahve to handle package BLE timing, alongside sensor polling for both sensors.
-
-## Fiachra — Wheat Weasel
-
-### Core Intelligence + Control (Base Node)
-
-Fiachra will focus on writing embedded code for the Base Node. This includes establishing two BLE NUS central connections to work with peripheral connections at the Actuator Node, and Sensor Node respectively. The Base Node must also parse incoming .json data, and format it as a min-heap. The Base Node will have to run a Kalman Filter on the incoming data, and compute nearest calculations such as relative position. It should also be able to contiously track positional data for a chosen plane (dashboard). Fiachra will also develop a uart serial communication with the dashboard, with ability to send data to, and recieve data/requests from the dashboard. Finally, the chosen plane (dashboard) position should be communicated to the Actuator Node. The Base Node must also maintain a multi-threaded state machine and manage memory throughout.
-
-## Sidney — Wheat Wolf
-
-### Dashboard + Actuation + Integration
-
-Sidney will handle dashboard design, and integration as well as embedded code for the Actuator Node. This will involve creating a Zephyr driver for the 2-axis servo at the Actuator Node, utilising PWM. Sidney will introduce a BLE NUS central connection to receive positional commands from the Base Node. He will also have to develop the web dashboard UI to display current planes and plane data and allow for user selection of visible planes. It should also be able to visualise the continious flight poth of the chosen plane, and send the selected plane ID to the base node.
-
-# Project Overview/Scenario
-
-## Project Description
+## Project Overview
 
 ### The Problem
 
@@ -61,6 +37,23 @@ The Pan and Tilt servo will be utilised to create a accurate connection between 
 Recent Surveys suggest 70% of people living in areas under a flight path report that they have been affected on a daily basis by aircraft flying overhead to some extent.
 
 Showing that having a highly reliable plane tracking and data aquisition tool would be game changing not only for Brisbanites but for the public health of Australia.
+
+## Team Member List and Roles
+
+### Xander
+#### Sensors + Data Handling (Sensor Node)
+
+Xander will focus on embedded code for the Sensor Node, as well as python code for the Raspberry Pi sensor controller. This will require establishing a BLE peripheral connection with the Base Node, and forming packets of plane data to send. The Raspberry Pi will be set up as a sensor controller for the RTL2832U, piping incoming data to the node over UART serial. Data will be decoded, filtered, sorted and packaged to .json. A zephyr driver will be created for the SAM-M8Q GPS module, and gps data will be sent to the Base Node when required. The Node will ahve to handle package BLE timing, alongside sensor polling for both sensors.
+
+### Fiachra
+#### Core Intelligence + Control (Base Node)
+
+Fiachra will focus on writing embedded code for the Base Node. This includes establishing two BLE NUS central connections to work with peripheral connections at the Actuator Node, and Sensor Node respectively. The Base Node must also parse incoming .json data, and format it as a min-heap. The Base Node will have to run a Kalman Filter on the incoming data, and compute nearest calculations such as relative position. It should also be able to contiously track positional data for a chosen plane (dashboard). Fiachra will also develop a uart serial communication with the dashboard, with ability to send data to, and recieve data/requests from the dashboard. Finally, the chosen plane (dashboard) position should be communicated to the Actuator Node. The Base Node must also maintain a multi-threaded state machine and manage memory throughout.
+
+### Sidney
+#### Dashboard + Actuation + Integration
+
+Sidney will handle dashboard design, and integration as well as embedded code for the Actuator Node. This will involve creating a Zephyr driver for the 2-axis servo at the Actuator Node, utilising PWM. Sidney will introduce a BLE NUS central connection to receive positional commands from the Base Node. He will also have to develop the web dashboard UI to display current planes and plane data and allow for user selection of visible planes. It should also be able to visualise the continious flight poth of the chosen plane, and send the selected plane ID to the base node.
 
 ## Deliverables & Key Performance Indicators
 
