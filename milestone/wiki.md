@@ -161,6 +161,8 @@ The Actuator Node receives the required pitch and yaw values from the base node 
 
 ## DIKW Pyramid Abstraction
 
+![](DIKW_diagram.png)
+
 ## Project Software/Hardware management
 
 ## Zephyr RTOS Advanced Libraries and Kernel Features
