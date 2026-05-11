@@ -162,7 +162,11 @@ The Actuator Node receives the required pitch and yaw values from the base node 
 ![](message_protocol_diagram.png)
 
 ## Algorithms
-
+### Base Node
+- Min-heap - For storing 30 closest planes and details
+- Kalman Filter - For smoothing out location data
+### Web Interface
+- Uber's H3 algorithm - Heat mapping on the interface for mapping hot spots for planes
 ## DIKW Pyramid Abstraction
 
 ## Project Software/Hardware management
