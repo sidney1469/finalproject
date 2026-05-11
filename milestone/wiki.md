@@ -94,7 +94,7 @@ Code will reflect the Google C++ Style Guide and code will be sufficiently comme
 
 ## Wireless Network Communications
 
-### Raspberry Pi"position": [{"lat": float, "long", float, "alt": float}]
+### Raspberry Pi
 
 The raspberry pi is responsible for receiving the information from the RTL2832U transponder using Dump1090, once processed, the relevant plane information will be sent via serial in a json format to the zephyr based sensor node. The json format will be the following.
 
@@ -111,7 +111,7 @@ The raspberry pi is responsible for receiving the information from the RTL2832U 
         ...
     ]}
 
-### Sensor Node (xiao seed board)
+### Sensor Node
 
 The sensor node is responsible for the following:
 
@@ -125,7 +125,7 @@ The SAM-M8Q continuously sends GPS data over UART in the form
 
 a polling function will read the current value and package the data with the plane data from the raspberry pi.
 
-The packaged packet will be transmitted via BLE to the base node, this will use bluetooth nus to communicate with the other zephyr based xiao board. The packet will be formatted in json with the following format.
+The packaged packet will be transmitted via BLE to the base node, this will use BLE NUS to communicate with the other zephyr based xiao board. The packet will be formatted in json with the following format.
 
     { "plane_count": int,
     "planes": [
@@ -137,7 +137,7 @@ The packaged packet will be transmitted via BLE to the base node, this will use 
     {"lat": float, "long",
     float, "alt": float }]}
 
-### Base Node (xiao seed board)
+### Base Node
 
 The base node is responsible for the following:
 
@@ -145,7 +145,15 @@ The base node is responsible for the following:
 - Filtering for closest planes and passing data to the PC for display on the web dashboard
 - Calculating the required servo positions and communicating to the Actuator Node
 
-The communication
+The communication to the Actuator Node will be via bluetooth nus communication where it will send json encoded pitch and yaw values.
+
+    {"pitch": float, "yaw": float}
+
+### Actuator Node
+
+The Actuator Node receives the required pitch and yaw values from the base node and moves the servos using PWM signals connected to GPIO pins.
+
+### Message Protocol Diagram
 
 ![](message_protocol_diagram.png)
 
