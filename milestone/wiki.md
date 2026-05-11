@@ -1,6 +1,5 @@
 # Project Title
-Tracking Aircraft for a Sustainable Brisbane
-Wheat Weywot
+Wheat Weywot | Tracking Aircraft for a Sustainable Brisbane
 
 # Team Member List and Roles
 ## Sidney Neil
