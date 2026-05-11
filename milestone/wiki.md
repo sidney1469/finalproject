@@ -8,7 +8,7 @@ Wheat Weywot | Tracking Aircraft for a Sustainable future for Brisbane
 
 ### Sensors + Data Handling (Sensor Node)
 
-Xander will focus on embedded code for the Sensor Node, as well as python code for the Raspberry Pi sensor controller. This will require establishing a BLE peripheral connection with the Base Node, and forming packets of plane data to send. The Raspberry Pi will be set up as a sensor controller for the RTL2832U, piping incoming data to the node over UART serial. Data will be decoded, filtered, sorted and packaged to .json. A zephyr dirver will be created for the SAM-M8Q GPS module, and gps data will be sent to the Base Node when required. The Node will ahve to handle package BLE timing, alongside sensor polling for both sensors.
+Xander will focus on embedded code for the Sensor Node, as well as python code for the Raspberry Pi sensor controller. This will require establishing a BLE peripheral connection with the Base Node, and forming packets of plane data to send. The Raspberry Pi will be set up as a sensor controller for the RTL2832U, piping incoming data to the node over UART serial. Data will be decoded, filtered, sorted and packaged to .json. A zephyr driver will be created for the SAM-M8Q GPS module, and gps data will be sent to the Base Node when required. The Node will ahve to handle package BLE timing, alongside sensor polling for both sensors.
 
 ## Fiachra — Wheat Weasel
 
@@ -172,6 +172,8 @@ The Actuator Node receives the required pitch and yaw values from the base node 
 ![](DIKW_diagram.png)
 
 ## Project Software/Hardware management
+
+![](gantt_chart.png)
 
 ## Zephyr RTOS Advanced Libraries and Kernel Features
 
