@@ -50,7 +50,7 @@ Showing that having a highly reliable plane tracking and data aquisition tool wo
 
 ### 1. Dashboard Data Vision
 
-The web dashboard should be able to plot aircraft and user (Base Node) position, with no loss of data as recieved from the base. It should be able to plot at least 30 planes at once, and store 60 seconds of plane data for each plane.
+The web dashboard should be able to plot aircraft and user (Base Node) position, with no loss of data as received from the base. It should be able to plot at least 30 planes at once, and store 60 seconds of plane data for each plane.
 
 ### 2. Dashboard to Actuator Communication
 
@@ -62,7 +62,7 @@ The servo be able to update position to point at the chosen plane no less then o
 
 ### 4. Linked List
 
-The Base node should store data for 30 planes as received from the receiver node in a linked list.
+The Base node should store data for 30 planes as received from the sensor node in a linked list.
 
 ### 5. System runtime & Memory Management
 
@@ -82,9 +82,9 @@ Code will reflect the Google C++ Style Guide and code will be sufficiently comme
 
 ## Wireless Network Communications
 
-### Raspberry Pi
+### Raspberry Pi"position": [{"lat": float, "long", float, "alt": float}]
 
-The raspberry pi is responsible for receiving the information from the RTL2832U transponder using Dump1090, once processed, the relevant plane information will be sent via serial in a json format to the zephyr based receiver node. The json format will be the following.
+The raspberry pi is responsible for receiving the information from the RTL2832U transponder using Dump1090, once processed, the relevant plane information will be sent via serial in a json format to the zephyr based sensor node. The json format will be the following.
 
     {
     "plane_count": int,
@@ -99,9 +99,9 @@ The raspberry pi is responsible for receiving the information from the RTL2832U 
         ...
     ]}
 
-### Receiver Node (xiao seed board)
+### Sensor Node (xiao seed board)
 
-The receiver node is responsible for the following:
+The sensor node is responsible for the following:
 
 - Reading GPS data from the SAM-M8Q (via UART pins)
 - Receiving plane data from the raspberry pi (via USB-C) // Also power
@@ -124,6 +124,16 @@ The packaged packet will be transmitted via BLE to the base node, this will use 
     ], "position": [
     {"lat": float, "long",
     float, "alt": float }]}
+
+### Base Node (xiao seed board)
+
+The base node is responsible for the following:
+
+- Receiving telemetry data from sensor node
+- Filtering for closest planes and passing data to the PC for display on the web dashboard
+- Calculating the required servo positions and communicating to the Actuator Node
+
+The communication
 
 ![](message_protocol_diagram.png)
 
