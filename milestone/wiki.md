@@ -4,7 +4,19 @@ Wheat Weywot | Tracking Aircraft for a Sustainable future for Brisbane
 
 # Team Member List and Roles
 
-Sidney Neil, Fiachra Richards, Xander Akison
+## Xander — Wheat Wallaby
+
+### Radio + Data Handling
+
+## Fiachra — Wheat Weasel
+
+### Core Intelligence + Control (Base Node)
+
+Fiachra will focus on writing embedded code for the Base Node. This includes establishing two BLE central connections to work with peripheral connections at the Actuator Node, and Sensor Node respectively. The Base Node must also parse incoming .json data, and format it as a min-heap. The Base Node will have to run a Kalman Filter on the incoming data, and compute nearest calculations such as relative position. It should also be able to contiously track positional data for a chosen plane (dashboard). Fiachra will also develop a uart serial communication with the dashboard, with ability to send data to, and recieve data/requests from the dashboard. Finally, the chosen plane (dashboard) position should be communicated to the Actuator Node. The base node must also maintain a multi-threaded state machine and manage memory throughout.
+
+## Sidney — Wheat Wolf
+
+### Dashboard + Actuation + Integration
 
 # Project Overview/Scenario
 
@@ -62,7 +74,7 @@ The servo be able to update position to point at the chosen plane no less then o
 
 ### 4. Linked List
 
-The Base node should store data for 30 planes as received from the sensor node in a linked list.
+The Base node should store data for 30 planes as received from the Sensor Node in a min-heap.
 
 ### 5. System runtime & Memory Management
 
