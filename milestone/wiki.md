@@ -43,7 +43,7 @@ Showing that having a highly reliable plane tracking and data aquisition tool wo
 ### Xander
 #### Sensors + Data Handling (Sensor Node)
 
-Xander will focus on embedded code for the Sensor Node, as well as python code for the Raspberry Pi sensor controller. This will require establishing a BLE peripheral connection with the Base Node, and forming packets of plane data to send. The Raspberry Pi will be set up as a sensor controller for the RTL2832U, piping incoming data to the node over UART serial. Data will be decoded, filtered, sorted and packaged to .json. A zephyr driver for the gps module will be utilised, and gps data will be sent to the Base Node when required. The Node will ahve to handle package BLE timing, alongside sensor polling for both sensors.
+Xander will focus on embedded code for the Sensor Node, as well as python code for the Raspberry Pi sensor controller. This will require establishing a BLE peripheral connection with the Base Node, and forming packets of plane data to send. The Raspberry Pi will be set up as a sensor controller for the RTL2832U, piping incoming data to the node over UART serial. Data will be decoded, filtered, sorted and packaged to .json. A zephyr driver for the gps module will be utilised, and gps data will be sent to the Base Node when required. The Node will have to handle package BLE timing, alongside sensor polling for both sensors.
 
 ### Fiachra
 #### Core Intelligence + Control (Base Node)
@@ -53,7 +53,7 @@ Fiachra will focus on writing embedded code for the Base Node, as well as an ini
 ### Sidney
 #### Dashboard + Actuation + Integration
 
-Sidney will handle dashboard design, and integration as well as embedded code for the Actuator Node. This will involve creating a Zephyr driver for the 2-axis servo at the Actuator Node, utilising PWM. Sidney will introduce a BLE NUS central connection to receive positional commands from the Base Node. He will also have to develop the web dashboard UI to display current planes and plane data and allow for user selection of visible planes. It should also be able to visualise the continious flight poth of the chosen plane, and send the selected plane ID to the base node.
+Sidney will handle dashboard design, and integration as well as embedded code for the Actuator Node. This will involve creating a Zephyr driver for the 2-axis servo at the Actuator Node, utilising PWM. Sidney will introduce a BLE NUS peripheral connection to receive positional commands from the Base Node. He will also have to develop the web dashboard UI to display current planes and plane data and allow for user selection of visible planes. It should also be able to visualise the continious flight path of the chosen plane, and send the selected plane ID to the base node.
 
 ## Deliverables & Key Performance Indicators
 
