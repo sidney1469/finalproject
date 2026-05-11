@@ -168,5 +168,8 @@ The Actuator Node receives the required pitch and yaw values from the base node 
 ## Project Software/Hardware management
 
 ## Zephyr RTOS Advanced Libraries and Kernel Features
-
+- <zephyr/sys/min_heap.h>
+- <zephyr/bluetooth/services/nus.h>
+- <zephyr/bluetooth/bluetooth.h>
+- <zephyr/drivers/pwm.h>
 # Equipment
