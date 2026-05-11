@@ -1,8 +1,9 @@
 # Project Title
-Wheat Weywot | Tracking Aircraft for a Sustainable Brisbane
+Wheat Weywot | Tracking Aircraft for a Sustainable future for Brisbane
 
 # Team Member List and Roles
 ## Sidney Neil
+Sidney will work on controlling the Pan and Tilt servo and developing the web dashboard in which will display aircraft utilising the data aquired from the nodes.
 ## Fiachra Richards
 ## Xander Akison
 # Project Overview/Scenario
@@ -40,7 +41,7 @@ Showing that having a highly reliable plane tracking and data aquisition tool wo
 
 ## Deliverables & Key Performance Indicators
 ### 1. Dashboard Data Vision
-The web dashboard should be able to plot aircraft and user (Base Node) position, with no loss of data as receieved from the base. It should be able to plot at least 30 planes at once, and store 60 seconds of plane data for each plane.
+The web dashboard should be able to plot aircraft and user (Base Node) position, with no loss of data as recieved from the base. It should be able to plot at least 30 planes at once, and store 60 seconds of plane data for each plane.
 ### 2. Dashboard to Actuator Communication
 User should be able to select and toggle to a plane on the dashboard and have the servo reflect the planes position within a 3 second window.
 ### 3. Actuator Accuracy
