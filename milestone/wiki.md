@@ -176,3 +176,12 @@ The Actuator Node receives the required pitch and yaw values from the base node 
 ## Zephyr RTOS Advanced Libraries and Kernel Features
 
 # Equipment
+
+- RTL2832U - Radio transponder
+- SAM-M8Q - GPS Receiver
+- Xiao BLE Sense board \* 3
+- Pan & Tilt Servo
+- Raspberry Pi
+- Laptop/PC
+- Assorted male/male wires
+- Assorted USB - USB-C cables
