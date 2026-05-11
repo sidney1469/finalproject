@@ -39,9 +39,31 @@
 
       <section class="panel">
         <h2>Setup and Build</h2>
+        <h3>Node 1</h3>
         <ol>
-          <li>[Prerequisite 1]</li>
-          <li>[Build steps]</li>
+          <li>west build -p -b xiao_ble/nrf52840/sense -d node_one/build node_one</li>
+          <li>west flash --runner uf2 -d node_one/build</li>
+          <li>[Run/test steps]</li>
+        </ol>
+        <h3>Node 2</h3>
+        <ol>
+          <li>west build -p -b xiao_ble/nrf52840/sense -d node_two/build node_two</li>
+          <li>west flash --runner uf2 -d node_two/build</li>
+
+          <li>[Run/test steps]</li>
+        </ol>
+        <h3>Node 3</h3>
+        <ol>
+          <li>west build -p -b xiao_ble/nrf52840/sense -d node_three/build node_three</li>
+          <li>west flash --runner uf2 -d node_three/build</li>
+
+          <li>[Run/test steps]</li>
+        </ol>
+        <h3>Web Interface</h3>
+        <ol>
+          <li>west build -p -b xiao_ble/nrf52840/sense -d node_three/build node_three</li>
+          <li>west flash --runner uf2 -d node_three/build</li>
+
           <li>[Run/test steps]</li>
         </ol>
       </section>
