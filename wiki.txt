@@ -1,0 +1,37 @@
+# Project Title
+Tracking Aircraft for a Sustainable Future for Brisbane
+# Team Member List and Roles
+Sidney Neil, Fiachra Richards, Xander Akison
+# Project Overview/Scenario
+
+## Project Description
+
+## Deliverables & Key Performance Indicators
+
+## System Overview
+
+### Block Diagram
+Test A
+
+## System/Sensor Integration
+
+## Wireless Network Communications
+
+## Algorithms
+HELLO
+## DIKW Pyramid Abstraction
+
+## Project Software/Hardware management
+
+## Zephyr RTOS Advanced Libraries and Kernel Features
+
+# Equipment
+
+
+
+
+
+
+
+
+
