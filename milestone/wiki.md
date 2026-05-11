@@ -2,7 +2,7 @@
 Wheat Weywot | Tracking Aircraft for a Sustainable future for Brisbane
 
 # Team Member List and Roles
-## Sidney Neil
+## Sidney Neil (Wheat Wolf)
 Sidney will work on controlling the Pan and Tilt servo and developing the web dashboard in which will display aircraft utilising the data aquired from the nodes.
 ## Fiachra Richards
 ## Xander Akison
