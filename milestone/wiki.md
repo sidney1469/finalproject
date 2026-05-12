@@ -16,11 +16,11 @@ More people means more housing, more planes overhead and more noise. Accompanyin
 - Busier Roads
 - Houses in high noise areas
 
-Exposing people to the risks of louder neighbourhoods, resulting CO2 emissions and Noise from both more people needing to travel, Reduced Sleep and more.
+Exposing people to the risks of louder neighbourhoods, resulting CO2 emissions, more noise pollution (industrial noise, roads, etc), Reduced Sleep and more.
 
 #### We Believe Brisbane deserves better.
 
-While we know we can’t in this project stop the development of houses and urbanization of industrial areas. We believe every single bit of info helps which is why we have produced the solution which can help Brisbanites create informed decisions on their housing like never before.
+While we know we can’t in this project stop the development of houses and urbanization of industrial areas. We believe every single bit of info goes a long way which is why we have produced the solution which can help Brisbanites and hobbiests alike create informed decisions on their housing and travel like never before.
 
 ### The Solution
 
