@@ -5,7 +5,7 @@
 ### The Problem
 
 Brisbane is among the fastest growing populations in the world with a current population of approximately 2.5 million people and counting.
-2032 Olympic Games
+#### 2032 Olympic Games
 Additionally with the upcoming 2032 Olympic games the city's population is going to grow exponentially.
 
 ### Why is this important?
@@ -16,7 +16,7 @@ More people means more housing, more planes overhead and more noise. Accompanyin
 - Busier Roads
 - Houses in high noise areas
 
-Exposing people to health risks of more gas emissions from both cars and factories, Reduced Sleep and more.
+Exposing people to the risks of louder neighbourhoods, resulting CO2 emissions and Noise from both more people needing to travel, Reduced Sleep and more.
 
 #### We Believe Brisbane deserves better.
 
@@ -30,13 +30,15 @@ Utilising the RTL2832U transponder to extract precise coordinates of Aircraft we
 
 More Technically speaking to achieve this - we will have 3 Bluetooth nodes, 2 PC's, a Pan and Tilt Servo, RTL2832U transponder and a SAM-M8Q GPS Locator node.
 
-The Pan and Tilt servo will be utilised to create a accurate connection between the radio and Plane which will be selected on the interface.
+The Pan and Tilt servo will be utilised to show how just about any person wishing to utilise the open source tool is able to easily interface and utilise the data.
+
+We aim to make the project as transperant as possible aiming at both the hobbiests and Brisbanites who want to be informed about our great city. 
 
 #### But How Does This Link to Noise Pollution?
 
 Recent Surveys suggest 70% of people living in areas under a flight path report that they have been affected on a daily basis by aircraft flying overhead to some extent.
 
-Showing that having a highly reliable plane tracking and data aquisition tool would be game changing not only for Brisbanites but for the public health of Australia.
+Showing that having a highly reliable plane tracking and data aquisition tool would be game changing not only for Brisbanites but for the public health as a whole.
 
 ## Team Member List and Roles
 
@@ -86,12 +88,14 @@ Code will reflect the Google C++ Style Guide and code will be sufficiently comme
 
 ## System Overview
 
-The system is made up of three zephyr nodes and one Raspberry Pi node
+The system is made up of three zephyr nodes,a Raspberry Pi node, and a PC
 
+- **PC**:  The PC will manage the data incoming from the base node and utilise a backend and frontend for the web interface. The Backend will be scripted in Python and HTTP requests will be handled via FastAPI to the frontend. The frontend will be implemented using the React javascript framework to keep the inteface sleek and user friendly the HTTP requests will be handled using Axios. 
 - **Raspberry Pi**: A lightweight data scraper that will take information from the RTL2832U and pass it on to the Sensor Node, a Raspberry pi was selected as it is able to run Dump1090
 - **Sensor Node**: Receives the sensor data from the SAM-M8Q and the transmitted sensor data from a Raspberry Pi connected to the RTL2832U
 - **Base Node**: This node will perform most of the computation and acts as a relay from the Sensor Node to the web interface on the PC. The Base Node will also send commands to the servo motors through the Actuator Node
 - **Actuator Node**: This node will have a PWM actuator driver installed and will operate the pan & tilt servos based on position commands from the Base Node
+
 
 ### Block Diagram
 
@@ -193,11 +197,15 @@ The Actuator Node receives the required pitch and yaw values from the Base Node 
 
 ## Zephyr RTOS Advanced Libraries and Kernel Features
 
-- <zephyr/sys/min_heap.h>
-- <zephyr/bluetooth/services/nus.h>
-- <zephyr/bluetooth/bluetooth.h>
-- <zephyr/drivers/pwm.h>
-
+| Library | Description | Nodes Utilised |
+| ----------- | ----------- | ----------- |
+| `<zephyr/sys/min_heap.h>` | For storing closest 30 plane data. | Base Node |
+| `<zephyr/bluetooth/services/nus.h>` | For communication between nodes. | All Nodes |
+| `<zephyr/bluetooth/bluetooth.h>` | To support communications between nodes. | All Nodes |
+| `<zephyr/drivers/pwm.h>` | To drive the servo motor. | Actuator Node |
+| `<zephyr/sys/json.h>` | For communicating via serial between nodes. | Base Node and Sensor Node |
+| `<zephyr/shell/shell.h>` | To help with communication between nodes and driving shell commands. | Base Node |
+| `<zephyr/drivers/uart.h>` | For driving communication between the Sensor Node and SAM-M8Q GPS. | Sensor Node |
 # Equipment
 
 - RTL2832U - Radio transponder
