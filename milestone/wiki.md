@@ -169,7 +169,10 @@ The Actuator Node receives the required pitch and yaw values from the base node 
 ![](gantt_chart.png)
 
 ## Zephyr RTOS Advanced Libraries and Kernel Features
-
+- <zephyr/sys/min_heap.h>
+- <zephyr/bluetooth/services/nus.h>
+- <zephyr/bluetooth/bluetooth.h>
+- <zephyr/drivers/pwm.h>
 # Equipment
 
 - RTL2832U - Radio transponder
