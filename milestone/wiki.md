@@ -214,6 +214,8 @@ The Actuator Node receives the required pitch and yaw values from the Base Node 
 | `<zephyr/sys/json.h>` | For communicating via serial between nodes. | Base Node and Sensor Node |
 | `<zephyr/shell/shell.h>` | To help with communication between nodes and driving shell commands. | Base Node |
 | `<zephyr/drivers/uart.h>` | For driving communication between the Sensor Node and SAM-M8Q GPS. | Sensor Node |
+| `k_thread` | For handling multithreading and state machines in each node| All nodes |
+| `k_work` | For offloading high intensity tasks such as Kalman, or heap handling| Base Node |
 # Equipment
 
 - RTL2832U - Radio transponder
