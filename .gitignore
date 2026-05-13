@@ -1,2 +1,6 @@
-*/build/*
+# Firmware build outputs
+build/
+**/build/
+
+# OS files
 .DS_Store
