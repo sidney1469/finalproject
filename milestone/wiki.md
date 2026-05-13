@@ -32,7 +32,7 @@ More Technically speaking to achieve this - we will have 3 Bluetooth nodes, 2 PC
 
 The Pan and Tilt servo will be utilised to show how just about any person wishing to utilise the open source tool is able to easily interface and utilise the data.
 
-We aim to make the project as transperant as possible aiming at both the hobbiests and Brisbanites who want to be informed about our great city. 
+We aim to make the project as transperant as possible aiming at both the hobbiests and Brisbanites who want to be informed about our great city.
 
 #### But How Does This Link to Noise Pollution?
 
@@ -90,7 +90,7 @@ Code will reflect the Google C++ Style Guide and code will be sufficiently comme
 
 The system is made up of three zephyr nodes,a Raspberry Pi node, and a PC
 
-- **PC**:  The PC will manage the data incoming from the base node and utilise a backend and frontend for the web interface. The Backend will be scripted in Python and HTTP requests will be handled via FastAPI to the frontend. The frontend will be implemented using the React javascript framework to keep the inteface sleek and user friendly the HTTP requests will be handled using Axios. 
+- **PC**:  The PC will manage the data incoming from the base node and utilise a backend and frontend for the web interface. The Backend will be scripted in Python and HTTP requests will be handled via FastAPI to the frontend. The frontend will be implemented using the React javascript framework to keep the inteface sleek and user friendly the HTTP requests will be handled using Axios.
 - **Raspberry Pi**: A lightweight data scraper that will take information from the RTL2832U and pass it on to the Sensor Node, a Raspberry pi was selected as it is able to run Dump1090
 - **Sensor Node**: Receives the sensor data from the SAM-M8Q and the transmitted sensor data from a Raspberry Pi connected to the RTL2832U
 - **Base Node**: This node will perform most of the computation and acts as a relay from the Sensor Node to the web interface on the PC. The Base Node will also send commands to the servo motors through the Actuator Node
@@ -193,7 +193,8 @@ The Actuator Node receives the required pitch and yaw values from the Base Node 
 
 ## Project Software/Hardware management
 
-![](gantt_chart.png)
+![](gantt_chart_a.png)
+![](gantt_chart_b.png)
 
 ## Zephyr RTOS Advanced Libraries and Kernel Features
 
