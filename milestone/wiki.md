@@ -97,9 +97,11 @@ The system is made up of three zephyr nodes,a Raspberry Pi node, and a PC
 - **Actuator Node**: This node will have a PWM actuator driver installed and will operate the pan & tilt servos based on position commands from the Base Node
 
 
-### Block Diagram
+### Hardware Architecture - Block Diagram
 
 ![](block_diagram.png)
+
+### Software Architecture - Flow Charts
 #### Base Node Threads
 ![](base_threads_a.png)
 ![](base_threads_b.png)
