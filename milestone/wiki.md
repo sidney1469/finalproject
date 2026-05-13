@@ -100,7 +100,9 @@ The system is made up of three zephyr nodes,a Raspberry Pi node, and a PC
 ### Block Diagram
 
 ![](block_diagram.png)
-
+#### Base Node Threads
+![](base_threads_a.png)
+![](base_threads_b.png)
 #### Actuator Node Threads
 ![](actuator_threads.png)
 #### Sensor Node Threads
