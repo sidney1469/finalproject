@@ -101,6 +101,10 @@ The system is made up of three zephyr nodes,a Raspberry Pi node, and a PC
 
 ![](block_diagram.png)
 
+![](bluetooth_thread.png)
+
+![](servo_thread.png)
+
 ## Sensor Integration
 
 ### RTL2832U
