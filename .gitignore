@@ -4,3 +4,4 @@ build/
 
 # OS files
 .DS_Store
+.venv/
