@@ -1,0 +1,14 @@
+
+.plane-marker {
+  background: transparent;
+  border: none;
+}
+
+.leaflet-container {
+  height: 500px;
+  width: 100%;
+}
+
+.selected-plane-marker {
+  filter: drop-shadow(2px 2px 0 black);
+}
