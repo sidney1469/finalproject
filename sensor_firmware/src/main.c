@@ -22,9 +22,10 @@ int main(void)
             printk("Sent: %s\n", msg);
         } else {
             printk("Waiting for GPS fix...\n");
+            send_over_nus("TEST MESSAGE since GPS isn't working");
         }
 
-        k_sleep(K_SECONDS(10));  /* Send every 10 seconds */
+        k_sleep(K_SECONDS(2));  /* Send every 10 seconds */
     }
 
     return 0;
