@@ -1,23 +1,25 @@
-/* gps_driver.c */
 #include "gps_driver.h"
 
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
-#include <zephyr/drivers/i2c.h>
 #include <zephyr/devicetree.h>
-#include <zephyr/sys/printk.h>
+#include <zephyr/drivers/i2c.h>
 
-#include <string.h>
-#include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define UBLOX_ADDR    0x42
-#define NMEA_MAX_LEN  128
+#define UBLOX_ADDR 0x42
+#define NMEA_MAX_LEN 128
+
+#define GPS_THREAD_STACK_SIZE 2048
+#define GPS_THREAD_PRIORITY 7
+#define GPS_POLL_MS 50
 
 static const struct device *gps_i2c;
 static char nmea_buf[NMEA_MAX_LEN];
-static int  nmea_len;
+static int nmea_len;
 
 static gps_location_t g_loc;
 K_MUTEX_DEFINE(g_loc_mutex);
@@ -46,53 +48,18 @@ static bool nmea_to_decimal(const char *coord, const char *hemi, double *out_deg
     return true;
 }
 
-static void update_fix(double lat, double lon, bool has_alt, double alt)
+static void update_fix(double lat, double lon, double alt)
 {
     k_mutex_lock(&g_loc_mutex, K_FOREVER);
-
     g_loc.latitude = lat;
     g_loc.longitude = lon;
-    if (has_alt) {
-        g_loc.altitude_m = alt;
-    }
+    g_loc.altitude_m = alt;
     g_loc.valid = true;
     g_loc.fix_seq++;
-
     k_mutex_unlock(&g_loc_mutex);
 }
 
-static void parse_gnrmc(char *s)
-{
-    if (*s == '$') {
-        s++;
-    }
-
-    char *type = strsep(&s, ",");
-    if (!type || strcmp(type, "GNRMC") != 0) {
-        return;
-    }
-
-    (void)strsep(&s, ",");          /* time_utc */
-    char *status   = strsep(&s, ",");
-    char *lat      = strsep(&s, ",");
-    char *lat_hemi = strsep(&s, ",");
-    char *lon      = strsep(&s, ",");
-    char *lon_hemi = strsep(&s, ",");
-
-    if (!status || status[0] != 'A') {
-        return; /* invalid fix */
-    }
-
-    double lat_dd, lon_dd;
-    if (!nmea_to_decimal(lat, lat_hemi, &lat_dd) ||
-        !nmea_to_decimal(lon, lon_hemi, &lon_dd)) {
-        return;
-    }
-
-    /* RMC has valid position; keep previous altitude if no new alt in this sentence */
-    update_fix(lat_dd, lon_dd, false, 0.0);
-}
-
+/* Minimal: only accept GNGGA sentences */
 static void parse_gngga(char *s)
 {
     if (*s == '$') {
@@ -104,35 +71,36 @@ static void parse_gngga(char *s)
         return;
     }
 
-    (void)strsep(&s, ",");          /* time_utc */
+    (void)strsep(&s, ",");   /* time */
     char *lat      = strsep(&s, ",");
     char *lat_hemi = strsep(&s, ",");
     char *lon      = strsep(&s, ",");
     char *lon_hemi = strsep(&s, ",");
     char *fix_q    = strsep(&s, ",");
-    (void)strsep(&s, ",");          /* num_sats */
-    (void)strsep(&s, ",");          /* hdop */
+    (void)strsep(&s, ",");   /* sats */
+    (void)strsep(&s, ",");   /* hdop */
     char *alt      = strsep(&s, ",");
-    (void)strsep(&s, ",");          /* alt_units */
 
     if (!fix_q || fix_q[0] == '0') {
-        return; /* no fix */
+        return;
     }
 
-    double lat_dd, lon_dd, alt_m;
-    char *endp = NULL;
-    alt_m = strtod(alt ? alt : "", &endp);
-    if (endp == alt) {
-        alt_m = 0.0;
-    }
-
+    double lat_dd, lon_dd;
     if (!nmea_to_decimal(lat, lat_hemi, &lat_dd) ||
         !nmea_to_decimal(lon, lon_hemi, &lon_dd)) {
         return;
     }
 
-    /* GGA provides position + altitude */
-    update_fix(lat_dd, lon_dd, true, alt_m);
+    double alt_m = 0.0;
+    if (alt && alt[0] != '\0') {
+        char *endp = NULL;
+        double parsed = strtod(alt, &endp);
+        if (endp != alt) {
+            alt_m = parsed;
+        }
+    }
+
+    update_fix(lat_dd, lon_dd, alt_m);
 }
 
 static void parse_nmea_sentence(char *line)
@@ -152,16 +120,14 @@ static void parse_nmea_sentence(char *line)
         return;
     }
 
-    if (strncmp(line, "$GNRMC", 6) == 0) {
-        parse_gnrmc(line);
-    } else if (strncmp(line, "$GNGGA", 6) == 0) {
+    if (strncmp(line, "$GNGGA", 6) == 0) {
         parse_gngga(line);
     }
 }
 
-static void nmea_feed_byte(uint8_t b)
+static void nmea_feed_byte(uint8_t buf)
 {
-    if (b == '$') {
+    if (buf == '$') {
         nmea_len = 0;
         nmea_buf[nmea_len++] = '$';
         return;
@@ -172,47 +138,38 @@ static void nmea_feed_byte(uint8_t b)
     }
 
     if (nmea_len < (NMEA_MAX_LEN - 1)) {
-        nmea_buf[nmea_len++] = (char)b;
+        nmea_buf[nmea_len++] = (char)buf;
     }
 
-    if (b == '\n') {
+    if (buf == '\n') {
         nmea_buf[nmea_len] = '\0';
         parse_nmea_sentence(nmea_buf);
         nmea_len = 0;
     }
 }
 
-int gps_init(void)
+static void gps_thread()
 {
     gps_i2c = DEVICE_DT_GET(DT_NODELABEL(i2c1));
     if (!device_is_ready(gps_i2c)) {
-        printk("GPS: I2C device not ready\n");
-        return -ENODEV;
+        return;
     }
 
-    nmea_len = 0;
-    memset(&g_loc, 0, sizeof(g_loc));
-    return 0;
+    while (1) {
+        uint8_t buf[64];
+        int ret = i2c_read(gps_i2c, buf, sizeof(buf), UBLOX_ADDR);
+        if (ret == 0) {
+            for (size_t i = 0; i < sizeof(buf); i++) {
+                nmea_feed_byte(buf[i]);
+            }
+        }
+
+        k_msleep(GPS_POLL_MS);
+    }
 }
 
-int gps_poll(void)
-{
-    if (!gps_i2c) {
-        return -ENODEV;
-    }
-
-    uint8_t buf[64];
-    int ret = i2c_read(gps_i2c, buf, sizeof(buf), UBLOX_ADDR);
-    if (ret != 0) {
-        return ret;
-    }
-
-    for (size_t i = 0; i < sizeof(buf); i++) {
-        nmea_feed_byte(buf[i]);
-    }
-
-    return 0;
-}
+K_THREAD_DEFINE(gps_id, GPS_THREAD_STACK_SIZE, gps_thread,
+                NULL, NULL, NULL, GPS_THREAD_PRIORITY, 0, 0);
 
 gps_location_t get_location(void)
 {
