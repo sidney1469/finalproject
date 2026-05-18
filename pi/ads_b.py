@@ -197,11 +197,11 @@ def main():
             while "\n" in buf:
                 line, buf = buf.split("\n", 1)
                 line = line.strip()
-                if not line:
+                #if not line:
                     # continue
 
                 icao, updates = parse_sbs(line)
-                if icao is None:
+                #if icao is None:
                     # continue
 
                 # Update aircraft state
