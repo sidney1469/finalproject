@@ -8,5 +8,5 @@ target_sources(app PRIVATE
     src/main.c
     src/ble_transfer.c
     src/gps_driver.c
-    # src/serial.c
+    src/serial.c
     )
