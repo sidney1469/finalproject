@@ -7,5 +7,5 @@ project(sensor_node)
 target_sources(app PRIVATE 
     src/main.c
     src/ble_transfer.c
-    # src/gps_driver.c
+    src/gps_driver.c
     )
