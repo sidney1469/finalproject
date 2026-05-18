@@ -198,20 +198,21 @@ def main():
                 line, buf = buf.split("\n", 1)
                 line = line.strip()
                 if not line:
-                    continue
+                    # continue
 
                 icao, updates = parse_sbs(line)
                 if icao is None:
-                    continue
+                    # continue
 
                 # Update aircraft state
-                aircraft_state[icao].update(updates)
-                aircraft_seen[icao] = time.time()
+                #aircraft_state[icao].update(updates)
+                #aircraft_seen[icao] = time.time()
 
                 # Try to emit a packet
-                packet = format_packet(icao, aircraft_state[icao])
-                if packet is None:
-                    continue
+                #packet = format_packet(icao, aircraft_state[icao])
+                #if packet is None:
+                    #continue
+                packet = "7C39F6,3675,-27.44316,153.15009,151,120,19:18:02.833\n"
 
                 try:
                     ser.write(packet.encode("ascii"))
