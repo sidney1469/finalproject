@@ -156,9 +156,8 @@ def open_dump1090():
             log(f"Failed to connect to dump1090: {e} — retrying in {RECONNECT_DELAY}s")
             time.sleep(RECONNECT_DELAY)
 
-
 def main():
-    # aircraft_state[icao] = { "alt": ..., "lat": ..., ... }
+    # aircraft_state[i] = { "alt": ..., "lat": ..., ... }
     aircraft_state = defaultdict(dict)
     # aircraft_seen[icao] = last seen timestamp
     aircraft_seen = {}
@@ -197,29 +196,30 @@ def main():
             while "\n" in buf:
                 line, buf = buf.split("\n", 1)
                 line = line.strip()
-                #if not line:
-                    # continue
+                if not line:
+                     continue
 
                 icao, updates = parse_sbs(line)
-                #if icao is None:
-                    # continue
+                if icao is None:
+                     continue
 
                 # Update aircraft state
-                #aircraft_state[icao].update(updates)
-                #aircraft_seen[icao] = time.time()
+                aircraft_state[icao].update(updates)
+                aircraft_seen[icao] = time.time()
 
                 # Try to emit a packet
-                #packet = format_packet(icao, aircraft_state[icao])
-                #if packet is None:
-                    #continue
-                packet = "7C39F6,3675,-27.44316,153.15009,151,120,19:18:02.833\n"
+                packet = format_packet(icao, aircraft_state[icao])
+                if packet is None:
+                    continue
 
                 try:
                     ser.write(packet.encode("ascii"))
+                    ser.flush()
                 except serial.SerialException as e:
                     log(f"Serial write error: {e} — reconnecting serial")
                     ser.close()
                     ser = open_serial()
+                    print("Sent packet")
 
             # Flush stale aircraft
             now = time.time()
@@ -236,6 +236,15 @@ def main():
             ser.close()
             sys.exit(0)
 
+"""
+def main():
+    ser = open_serial()
+    while True:
+        ser.write("7C39F6,3675,-27.44316,153.15009,151,120,19:18:02.833\n".encode("ascii"))        
+        ser.flush()        
+        print("Sent packet")
+        time.sleep(1)
+"""
 
 if __name__ == "__main__":
     main()
