@@ -18,8 +18,8 @@
  */
 static float heap_node_distance_squared(const struct HEAP_NODE *node)
 {
-    float dx = node->plane_data.lon - node->gps_data.lon;
-    float dy = node->plane_data.lat - node->gps_data.lat;
+    float dx = node->longitude - node->loclong;
+    float dy = node->latitude - node->loclat;
 
     return (dx * dx) + (dy * dy);
 }
@@ -52,7 +52,7 @@ static bool match_flight_name(const void *a, const void *b)
         return false;
     }
 
-    return strcmp(node->plane_data.icao, flightName) == 0;
+    return strcmp(node->flightName, flightName) == 0;
 }
 
 MIN_HEAP_DEFINE_STATIC(planeheap,
@@ -62,19 +62,32 @@ MIN_HEAP_DEFINE_STATIC(planeheap,
                compare_heap_nodes);
 
                
-int insert_into_heap(gps_location_t gps_data, airplane_t plane_data)
+int insert_into_heap(const char *flightName,
+             float longitude,
+             float latitude,
+             float loclong,
+             float loclat)
 {
     struct HEAP_NODE node = {0};
     struct HEAP_NODE deletednode = {0};
     size_t index;
 
-    node.gps_data = gps_data;
-    node.plane_data = plane_data;
+    if (flightName == NULL) {
+        return -EINVAL;
+    }
+
+    strncpy(node.flightName, flightName, sizeof(node.flightName) - 1);
+    node.flightName[sizeof(node.flightName) - 1] = '\0';
+
+    node.longitude = longitude;
+    node.latitude = latitude;
+    node.loclong = loclong;
+    node.loclat = loclat;
 
     int ret = min_heap_push(&planeheap, &node);
 
     if (ret != 0) {
-        printk("insert_into_heap: failed to push %s: %d\n", plane_data.icao, ret);
+        printk("insert_into_heap: failed to push %s: %d\n", flightName, ret);
         return ret;
     }
 
@@ -97,11 +110,11 @@ int convert_heap_to_string()
 
         printk("%s{\"f\":\"%s\",\"lo\":%.4f,\"la\":%.4f,\"ll\":%.4f,\"lt\":%.4f}",
                     index > 0 ? "," : "",
-                    d->plane_data.icao,
-                    d->plane_data.lon,
-                    d->plane_data.lat,
-                    d->gps_data.lon,
-                    d->gps_data.lat);
+                    d->flightName,
+                    (double)d->longitude,
+                    (double)d->latitude,
+                    (double)d->loclong,
+                    (double)d->loclat);
         k_msleep(20);
         index++;
     }

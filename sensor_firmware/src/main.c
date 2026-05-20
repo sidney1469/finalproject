@@ -22,7 +22,7 @@ static int parse_plane_csv(const char *raw, airplane_t *out)
                          &out->lon,
                          &out->spd,
                          &out->head,
-                         out->timestamp);
+                         out->ts);
 
     return (matched == 7) ? 0 : -1;
 }
@@ -41,9 +41,9 @@ int main(void)
         return 0;
     }
     gps_location_t current_loc;
-    current_loc.latitude = -27.497358;
-    current_loc.longitude = 153.013259;
-    current_loc.altitude_m = 10.00;
+    current_loc.lat = -27.497358;
+    current_loc.lon = 153.013259;
+    current_loc.alt = 10.00;
     current_loc.valid = true;
 
     while (1) {
@@ -52,12 +52,12 @@ int main(void)
         if (new_loc.valid) {
             // Update current location with new gps info
             char msg[200];
-            current_loc.latitude = new_loc.latitude;
-            current_loc.longitude = new_loc.longitude;
-            current_loc.altitude_m = new_loc.altitude_m;
+            current_loc.lat = new_loc.lat;
+            current_loc.lon = new_loc.lon;
+            current_loc.alt = new_loc.alt;
             snprintf(msg, sizeof(msg),
                      "{\"lat\":%.6f,\"lon\":%.6f,\"alt\":%.2f}",
-                     new_loc.latitude, new_loc.longitude, new_loc.altitude_m);
+                     new_loc.lat, new_loc.lon, new_loc.alt);
             printk("Received GPS: %s\n", msg);
         } else {
             printk("Waiting for GPS fix...\n");
@@ -70,7 +70,7 @@ int main(void)
 
         if (raw_plane_data && parse_plane_csv(raw_plane_data, &plane) == 0) {
             printk("plane: %s alt=%.1f lat=%.6f lon=%.6f spd=%.1f head=%.1f ts=%s\n",
-       plane.icao, plane.alt, plane.lat, plane.lon, plane.spd, plane.head, plane.timestamp);
+       plane.icao, plane.alt, plane.lat, plane.lon, plane.spd, plane.head, plane.ts);
         }
 
         sensor_message_t message = {
