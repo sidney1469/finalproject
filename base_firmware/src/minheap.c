@@ -121,8 +121,9 @@ int convert_heap_to_string()
 
     printk("]\n");
 
-    // struct HEAP_NODE *d;
-
-    // while (min_heap_pop(&planeheap, &d)){ /*Empty Minheap*/}
+    struct HEAP_NODE out;
+    while (min_heap_pop(&planeheap, &out) == 0) {
+        /* popped one */
+    }
     return 0;
 }
