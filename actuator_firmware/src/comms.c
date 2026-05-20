@@ -84,19 +84,23 @@ int init_comms(void)
 {
     int err;
 
-    k_work_init(&adv_wq, adv_wq_handler);
-
     err = bt_nus_cb_register(&nus_listener, NULL);
-    if (err) {
-        printk("NUS register failed (err %d)\n", err);
-        return err;
-    }
+	if (err) {
+		printk("Failed to register NUS callback: %d\n", err);
+		return err;
+	}
 
-    err = bt_le_adv_start(BT_LE_ADV_CONN_FAST_1, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
-    if (err) {
-        printk("Advertising failed (err %d)\n", err);
-        return err;
-    }
+	err = bt_enable(NULL);
+	if (err) {
+		printk("Failed to enable bluetooth: %d\n", err);
+		return err;
+	}
+
+	err = bt_le_adv_start(BT_LE_ADV_CONN_FAST_1, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
+	if (err) {
+		printk("Failed to start advertising: %d\n", err);
+		return err;
+	}
 
     printk("Advertising as %s...\n", DEVICE_NAME);
     return 0;
