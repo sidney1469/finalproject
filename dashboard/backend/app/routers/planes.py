@@ -225,7 +225,7 @@ def get_polygon_coords():
 def get_planes_list():
     """Returns the most recent batch of planes from the DB."""
     try:
-        insert_planes()
+        return insert_planes()
     except Exception as e:
         print(f"[db] get_planes_list error: {e}")
         return []
@@ -239,70 +239,103 @@ def planes_health():
 # Serial
 # ---------------------------------------------------------------------------
 
-def parse_plane_json(raw: str) -> list[Plane]:
+def parse_plane_json(raw: str | bytes) -> list[Plane]:
+    if isinstance(raw, bytes):
+        raw = raw.decode(errors="replace")
+
     raw = raw.strip()
-    start = raw.find("[")
-    end   = raw.rfind("]")
+
+    # Find JSON array. Prefer plane-style JSON: [{"f":...}]
+    start = raw.find("[{")
+    if start == -1:
+        start = raw.find("[]")
+    if start == -1:
+        start = raw.find("[")
+
+    end = raw.rfind("]")
 
     if start == -1 or end == -1 or end <= start:
+        logger.warning(f"[serial] no JSON array found in: {raw!r}")
         return []
+
+    json_text = raw[start:end + 1]
 
     try:
-        entries = json.loads(raw[start:end + 1])
+        entries = json.loads(json_text)
     except json.JSONDecodeError as e:
         logger.warning(f"[serial] JSON parse error: {e}")
+        logger.warning(f"[serial] raw JSON text: {json_text!r}")
         return []
 
-    planes = []
+    planes: list[Plane] = []
+
     for entry in entries:
         try:
-            planes.append(Plane(
-                flightName=entry["f"],
-                long=entry["lo"],
-                lat=entry["la"],
-            ))
-        except (KeyError, ValueError) as e:
+            planes.append(
+                Plane(
+                    flightName=str(entry["f"]),
+                    long=float(entry["lo"]),
+                    lat=float(entry["la"]),
+                )
+            )
+        except (KeyError, TypeError, ValueError) as e:
             logger.warning(f"[serial] bad entry {entry}: {e}")
 
     return planes
 
 
-# ---------------------------------------------------------------------------
-# DB
-# ---------------------------------------------------------------------------
+def read_json_from_serial(port, timeout: float = 2.0) -> str | None:
+    """
+    Reads serial lines until a JSON array is found or timeout expires.
+    Handles noisy Zephyr logs before/after the JSON.
+    """
+    deadline = time.monotonic() + timeout
+    buffer = ""
+
+    while time.monotonic() < deadline:
+        line = port.readline()
+
+        if not line:
+            continue
+
+        decoded = line.decode(errors="replace").strip()
+        logger.info(f"[serial RX] {decoded}")
+
+        buffer += decoded
+
+        # Once we have something that looks like a full JSON array, return it
+        if "[{" in buffer and "]" in buffer:
+            return buffer
+
+        # Also allow empty JSON array
+        if "[]" in buffer:
+            return buffer
+
+    return None
+
+
+def generate_dummy_planes(n: int = 30):
+    planes = []
+
+    for _ in range(n):
+        flight = (
+            ''.join(random.choices(string.ascii_uppercase, k=3)) +
+            ''.join(random.choices(string.digits, k=3))
+        )
+
+        # Brisbane-ish dummy range
+        longitude = round(random.uniform(152.5, 153.5), 4)
+        latitude = round(random.uniform(-27.8, -27.1), 4)
+
+        # Base/location point
+        loclong = 153.0100
+        loclat = -27.4600
+
+        planes.append((flight, longitude, latitude, loclong, loclat))
+
+    return planes
 
 def insert_planes() -> None:
-    NUM_PLANES = 30
-
-    def random_flight_name():
-        letters = ''.join(random.choices(string.ascii_uppercase, k=3))
-        numbers = ''.join(random.choices(string.digits, k=3))
-        return f"{letters}{numbers}"
-
-
-    def random_coord():
-        # Arbitrary test range — not geographically meaningful
-        return round(random.uniform(80.0, 100.0), 4)
-
-
-    def read_available(port, settle=0.3):
-        """Wait for `settle` seconds then drain everything in the RX buffer."""
-        time.sleep(settle)
-        while port.in_waiting:
-            line = port.readline()
-                #print("RX:", line.decode(errors="replace").strip())
-            line = (line.decode(errors="replace").strip())
-            logger.info(line)
-            return line
-
-    def read_for(port, duration=2.0):
-        """Read and print all lines received within `duration` seconds."""
-        line = port.readline()
-        if line:
-            return line.decode(errors="replace").strip()
-
-
-    logger.info("here")
     try:
         with Serial(
             PORT,
@@ -314,11 +347,24 @@ def insert_planes() -> None:
             xonxoff=False,
         ) as port:
 
+            time.sleep(2)  # board reset / serial settle
+
             port.reset_input_buffer()
             port.reset_output_buffer()
+
             port.write(b"plane print\r\n")
-            line = read_for(port, duration=2.0)
-            logger.info(line)
+            port.flush()
+
+            raw_json = read_json_from_serial(port, timeout=2.0)
+
+            if raw_json is None:
+                logger.warning("[serial] no JSON received")
+                return
+
+            planes = parse_plane_json(raw_json)
+
+            logger.info(f"[serial] decoded planes: {planes}")
+            return planes
 
     except SerialException as e:
         print(f"Could not open {PORT}: {e}")
