@@ -34,18 +34,12 @@ void my_receive_callback(const void *data, uint16_t len)
 
     /* Semantic guard: plane present but empty/default payload */
     if (received_data.plane.icao[0] == '\0' ||
-        received_data.plane.timestamp[0] == '\0') {
+        received_data.plane.ts[0] == '\0') {
         printk("No active plane data, skipping heap insert\n");
         return;
     }
 
-    int rc = insert_into_heap(
-        received_data.plane.icao,
-        (float)received_data.plane.lon,
-        (float)received_data.plane.lat,
-        (float)received_data.gps.longitude,
-        (float)received_data.gps.latitude
-    );
+    int rc = insert_into_heap(received_data.gps, received_data.plane);
 
     if (rc) {
         printk("insert_into_heap failed: %d\n", rc);
