@@ -5,7 +5,7 @@ project(base)
 
 target_sources(app PRIVATE
   src/main.c
-  src/ble_client.c
+  src/ble_central.c
 )
 
 zephyr_library_include_directories(${ZEPHYR_BASE}/samples/bluetooth)
