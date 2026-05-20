@@ -6,44 +6,7 @@
 #include "ble_transfer.h"
 #include "gps_driver.h"
 #include "serial.h"
-
-typedef struct {
-    char icao[8];
-    double alt;
-    double lat;
-    double lon;
-    double spd;
-    double head;
-    char timestamp[16];
-} airplane_t;
-
-typedef struct {
-    gps_location_t gps;
-    airplane_t plane;
-} sensor_message_t;
-
-static const struct json_obj_descr airplane_descr[] = {
-    JSON_OBJ_DESCR_PRIM(airplane_t, icao,      JSON_TOK_STRING_BUF),
-    JSON_OBJ_DESCR_PRIM(airplane_t, alt,       JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(airplane_t, lat,       JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(airplane_t, lon,       JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(airplane_t, spd,       JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(airplane_t, head,      JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(airplane_t, timestamp, JSON_TOK_STRING_BUF),
-};
-
-static const struct json_obj_descr gps_descr[] = {
-    JSON_OBJ_DESCR_PRIM(gps_location_t, latitude,   JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(gps_location_t, longitude,  JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(gps_location_t, altitude_m, JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(gps_location_t, valid,      JSON_TOK_TRUE),
-    JSON_OBJ_DESCR_PRIM(gps_location_t, fix_seq,    JSON_TOK_NUMBER),
-};
-
-static const struct json_obj_descr sensor_message_descr[] = {
-    JSON_OBJ_DESCR_OBJECT(sensor_message_t, gps, gps_descr),
-    JSON_OBJ_DESCR_OBJECT(sensor_message_t, plane, airplane_descr),
-};
+#include "protocol.h"
 
 static int parse_plane_csv(const char *raw, airplane_t *out)
 {
@@ -106,8 +69,8 @@ int main(void)
         airplane_t plane = {0};
 
         if (raw_plane_data && parse_plane_csv(raw_plane_data, &plane) == 0) {
-    //         printk("plane: %s alt=%.1f lat=%.6f lon=%.6f spd=%.1f head=%.1f ts=%s\n",
-    //    plane.icao, plane.alt, plane.lat, plane.lon, plane.spd, plane.head, plane.timestamp);
+            printk("plane: %s alt=%.1f lat=%.6f lon=%.6f spd=%.1f head=%.1f ts=%s\n",
+       plane.icao, plane.alt, plane.lat, plane.lon, plane.spd, plane.head, plane.timestamp);
         }
 
         sensor_message_t message = {
@@ -118,7 +81,7 @@ int main(void)
         char ble_msg[247] = {0};
 
         err = json_obj_encode_buf(sensor_message_descr,
-                                  ARRAY_SIZE(sensor_message_descr),
+                                  sensor_message_descr_len,
                                   &message,
                                   ble_msg,
                                   sizeof(ble_msg));
