@@ -1,0 +1,48 @@
+.sidepanelh1 {
+    font-family: Roboto-Mono, sans-serif;
+    align-items: flex-start;
+    font-size: 26px;
+    font-weight: bold;
+    margin: 10px;
+    display: flex;
+    flex: 0.33;
+    border-style: solid;
+    border-top-width: 0px;
+    border-left-width: 0px;
+    border-right-width: 0px;
+    border-bottom-width: 20px;
+    
+}
+
+.mainHeader {
+    display: flex;
+    font-family: Roboto Mono, sans-serif;
+    align-items: flex-start;
+    border-style: solid;
+    border-top-width: 0px;
+    border-left-width: 0px;
+    border-right-width: 0px;
+    border-bottom-width: 20px;
+    border-color: grey;
+}
+
+.headerDiv {
+    text-align: "left"; 
+    margin: 10px;
+}
+
+.unselectButton {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    border-radius: 5px;
+    border-color: white;
+    background-color: white;
+    color: black;
+    font-weight: bold;
+    align-items: center;
+    flex-direction: row;
+    width: 95%;
+    aspect-ratio: 10;
+    margin: 10px;
+}
