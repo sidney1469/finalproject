@@ -31,6 +31,8 @@ typedef struct {
     struct bt_gatt_exchange_params mtu_params;
     nus_data_cb_t data_cb;
     bool in_use;
+    uint16_t rx_handle;
+    bool is_sender;
 } ble_ctx_t;
 
 static ble_ctx_t clients[MAX_CONNECTIONS];
@@ -116,8 +118,12 @@ static uint8_t discover_func(struct bt_conn *conn, const struct bt_gatt_attr *at
 
     if (!bt_uuid_cmp(ctx->discover_params.uuid, &nus_svc_uuid.uuid)) {
 
-        // found NUS; find the tx characteristic
-        memcpy(&ctx->discover_uuid, &nus_tx_uuid.uuid, sizeof(ctx->discover_uuid));
+        if (ctx->is_sender) {
+            memcpy(&ctx->discover_uuid, &nus_rx_uuid.uuid, sizeof(ctx->discover_uuid));
+        } else {
+            memcpy(&ctx->discover_uuid, &nus_tx_uuid.uuid, sizeof(ctx->discover_uuid));
+        }
+
         ctx->discover_params.uuid = &ctx->discover_uuid.uuid;
         ctx->discover_params.start_handle = attr->handle + 1;
         ctx->discover_params.type = BT_GATT_DISCOVER_CHARACTERISTIC;
@@ -126,11 +132,15 @@ static uint8_t discover_func(struct bt_conn *conn, const struct bt_gatt_attr *at
         if (err) {
             printk("Discover failed (err %d)\n", err);
         }
+    } else if (!bt_uuid_cmp(ctx->discover_params.uuid, &nus_rx_uuid.uuid)) {
+        ctx->rx_handle = bt_gatt_attr_value_handle(attr);
+        printk("[SENDER READY] rx_handle = %u\n", ctx->rx_handle);
+        return BT_GATT_ITER_STOP;
     } else if (!bt_uuid_cmp(ctx->discover_params.uuid, &nus_tx_uuid.uuid)) {
         // found TX; find CCC
         memcpy(&ctx->discover_ccc_uuid.uuid, BT_UUID_GATT_CCC, sizeof(ctx->discover_ccc_uuid));
         ctx->discover_params.uuid = &ctx->discover_ccc_uuid.uuid;
-        ctx->discover_params.start_handle = attr->handle + 2;
+        ctx->discover_params.start_handle = bt_gatt_attr_value_handle(attr) + 1;
         ctx->discover_params.type = BT_GATT_DISCOVER_DESCRIPTOR;
         ctx->subscribe_params.value_handle = bt_gatt_attr_value_handle(attr);
 
@@ -260,7 +270,7 @@ BT_CONN_CB_DEFINE(conn_callbacks) = {
     .disconnected = disconnected,
 };
 
-int ble_add(const char *addr_str, nus_data_cb_t cb)
+int ble_add(const char *addr_str, nus_data_cb_t cb, bool is_sender)
 {
     for (int i = 0; i < MAX_CONNECTIONS; i++) {
         if (!clients[i].in_use) {
@@ -268,6 +278,8 @@ int ble_add(const char *addr_str, nus_data_cb_t cb)
             clients[i].data_cb = cb;
             clients[i].in_use = true;
             clients[i].conn = NULL;
+            clients[i].is_sender = is_sender;
+            clients[i].rx_handle = 0;
             return 0;
         }
     }
@@ -285,4 +297,20 @@ int ble_start(void)
     printk("Bluetooth initialized\n");
     start_scan();
     return 0;
+}
+
+int ble_send(const char *addr_str, const void *data, uint16_t len)
+{
+    for (int i = 0; i < MAX_CONNECTIONS; i++) {
+        if (!clients[i].in_use || !clients[i].conn || clients[i].rx_handle == 0) {
+            continue;
+        }
+        char target_str[BT_ADDR_LE_STR_LEN];
+        bt_addr_le_to_str(&clients[i].target_addr, target_str, sizeof(target_str));
+        if (strncmp(target_str, addr_str, strlen(addr_str)) == 0) {
+            return bt_gatt_write_without_response(clients[i].conn, clients[i].rx_handle, data, len,
+                                                  false);
+        }
+    }
+    return -ENODEV;
 }
