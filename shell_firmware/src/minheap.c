@@ -141,7 +141,7 @@ int min_heap_count(){
 	return count;
 }
 
-int convert_heap_to_string(char *json_buf, size_t json_buf_size)
+int convert_heap_to_string()
 {
 
     void *elem;

@@ -5,6 +5,7 @@ project(base)
 
 target_sources(app PRIVATE
   src/main.c
+  src/minheap.c
   src/ble_central.c
   ${CMAKE_CURRENT_SOURCE_DIR}/../lib/src/protocol.c
 )
