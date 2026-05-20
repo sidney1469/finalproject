@@ -6,9 +6,9 @@
 #include <stdbool.h>
 
 typedef struct {
-    double latitude;
-    double longitude;
-    double altitude_m;
+    double lat;
+    double lon;
+    double alt;
     bool valid;
     uint32_t fix_seq;
 } gps_location_t;
@@ -20,7 +20,7 @@ typedef struct {
     double lon;
     double spd;
     double head;
-    char timestamp[16];
+    char ts[16];
 } airplane_t;
 
 typedef struct {

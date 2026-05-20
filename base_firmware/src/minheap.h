@@ -2,18 +2,14 @@
 #define MINHEAP_H
 
 #include <stddef.h>
+#include "protocol.h"
 
 #define MAX_HEAP_SIZE 30
-#define FLIGHT_NAME_MAX_LEN 16
+#define FLIGHT_NAME_MAX_LEN 6
 
 struct HEAP_NODE {
-    char flightName[FLIGHT_NAME_MAX_LEN];
-
-    float longitude;
-    float latitude;
-
-    float loclong;
-    float loclat;
+    airplane_t plane_data;
+    gps_location_t gps_data;
 };
 
 void print_heap();
@@ -31,11 +27,7 @@ struct HEAP_JSON {
     size_t heap_len;
 };
 
-int insert_into_heap(const char *flightName,
-                     float longitude,
-                     float latitude,
-                     float loclong,
-                     float loclat);
+int insert_into_heap(gps_location_t gps_data, airplane_t plane_data);
 
 int convert_heap_to_string();
 
