@@ -5,6 +5,11 @@ build/
 # OS files
 .DS_Store
 
+# Environments
+.venv/
+
+# clangd language server cache
+.cache/
 */__pycache__/*
 */.venv/*
 */node_modules/*
