@@ -1,82 +1,97 @@
-#include <string.h>
+/*
+ * fs_firmware - Demonstrates LittleFS-backed logging on Zephyr.
+ *
+ * On boot we mount the filesystem, append a boot marker line, and print
+ * filesystem statistics. The `fslog` shell command (registered in fs_log.c)
+ * and the built-in `fs` shell can then be used at runtime to write/read
+ * log entries and manage files.
+ */
+
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
-#include "ble_central.h"
-#include "protocol.h"
-#include "minheap.h"
-#include <zephyr/data/json.h>
+#include <zephyr/fs/fs.h>
+#include <zephyr/logging/log.h>
 
-#define ACTUATOR_ADDR "C1:C4:D7:FA:FB:15" // Sidney's
-#define SENSOR_ADDR                                                                                \
-    "E9:83:9E:1B:4B:0F" // Xander's
-                        // "C5:9A:5F:B3:A9:65" // Fiachra's
+#include "fs_log.h"
 
-void my_receive_callback(const void *data, uint16_t len)
+LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
+
+#define BOOT_COUNT_PATH FS_LOG_MOUNT_POINT "/boot.cnt"
+
+/* Read the boot counter from the FS, increment it, and write it back.
+ * Returns the new boot count, or a negative errno on failure.
+ */
+static int update_boot_counter(void)
 {
-    sensor_message_t received_data;
-    char buf[len + 1];
-    memcpy(buf, data, len);
-    buf[len] = '\0';
-    printk("%s\n", buf);
-    int64_t parsed = json_obj_parse(buf, len, sensor_message_descr,
-                                sensor_message_descr_len, &received_data);
+    struct fs_file_t f;
+    uint32_t count = 0;
 
-    if (parsed < 0) {
-        printk("json parse failed: %lld\n", parsed);
-        return;
+    fs_file_t_init(&f);
+    int rc = fs_open(&f, BOOT_COUNT_PATH, FS_O_READ);
+    if (rc == 0) {
+        (void)fs_read(&f, &count, sizeof(count));
+        (void)fs_close(&f);
+    } else if (rc != -ENOENT) {
+        return rc;
     }
 
-    /* Optional: require that top-level "plane" object decoded (bit1) */
-    if ((parsed & 0x2) == 0) {
-        printk("No plane object in JSON\n");
-        return;
-    }
+    count++;
 
-    /* Semantic guard: plane present but empty/default payload */
-    if (received_data.plane.icao[0] == '\0' ||
-        received_data.plane.timestamp[0] == '\0') {
-        printk("No active plane data, skipping heap insert\n");
-        return;
+    fs_file_t_init(&f);
+    rc = fs_open(&f, BOOT_COUNT_PATH, FS_O_CREATE | FS_O_WRITE);
+    if (rc < 0) {
+        return rc;
     }
-
-    int rc = insert_into_heap(
-        received_data.plane.icao,
-        (float)received_data.plane.lon,
-        (float)received_data.plane.lat,
-        (float)received_data.gps.longitude,
-        (float)received_data.gps.latitude
-    );
-
-    if (rc) {
-        printk("insert_into_heap failed: %d\n", rc);
-        return;
+    ssize_t w = fs_write(&f, &count, sizeof(count));
+    (void)fs_sync(&f);
+    (void)fs_close(&f);
+    if (w < 0) {
+        return (int)w;
     }
-    convert_heap_to_string();
+    return (int)count;
 }
 
 int main(void)
 {
-    ble_add(SENSOR_ADDR, my_receive_callback, false);
-    ble_add(ACTUATOR_ADDR, NULL, true);
+    printk("\n=== fs_firmware starting ===\n");
 
-    int err = ble_start();
-    if (err) {
-        printk("BLE client start failed (err %d)\n", err);
+    int rc = fs_log_init();
+    if (rc < 0) {
+        printk("fs_log_init failed: %d\n", rc);
         return 0;
     }
 
-    printk("BLE client started\n");
+    int boot_no = update_boot_counter();
+    if (boot_no < 0) {
+        printk("update_boot_counter failed: %d\n", boot_no);
+        boot_no = 0;
+    }
 
+    rc = fs_log_writef("boot #%d uptime=%lld ms", boot_no, k_uptime_get());
+    if (rc < 0) {
+        printk("fs_log_writef failed: %d\n", rc);
+    } else {
+        printk("Logged boot marker (%d bytes)\n", rc);
+    }
+
+    size_t total = 0, used = 0;
+    if (fs_log_stats(&total, &used) == 0) {
+        printk("LittleFS: total=%u used=%u free=%u bytes\n",
+               (unsigned int)total, (unsigned int)used,
+               (unsigned int)(total - used));
+    }
+
+    int sz = fs_log_file_size();
+    if (sz >= 0) {
+        printk("Log file size: %d bytes\n", sz);
+    }
+
+    printk("Type `fslog read` to print the log, `fslog write <text>` to append,\n"
+           "`fslog clear` to wipe it, or use the built-in `fs` shell to browse.\n");
+
+    /* Heartbeat - keep the main thread alive so the shell stays responsive. */
     while (1) {
-        k_sleep(K_SECONDS(1));
-        err = ble_send(ACTUATOR_ADDR, "hello", strlen("hello"));
-        if (err == -ENODEV) {
-            printk("Sender not ready yet\n");
-        } else if (err) {
-            printk("Send failed (err %d)\n", err);
-        } else {
-            printk("Sent: hello\n");
-        }
+        k_sleep(K_SECONDS(60));
     }
     return 0;
 }
