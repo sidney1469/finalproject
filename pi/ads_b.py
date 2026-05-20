@@ -119,6 +119,7 @@ def format_packet(icao, state):
     lat = state["lat"]
     lon = state["lon"]
     spd = state["spd"]
+    hdg = state["hdg"]
     tim = state["tim"]
 
     # Truncate lat/lon to 5 decimal places to save bytes
@@ -128,7 +129,7 @@ def format_packet(icao, state):
     except ValueError:
         return None
 
-    return f"{icao},{alt},{lat},{lon},{spd},{tim}\n"
+    return f"{icao},{alt},{lat},{lon},{spd},{hdg},{tim}\n"
 
 
 def open_serial():
@@ -173,8 +174,14 @@ def main():
             # Read data from dump1090
             try:
                 data = sock.recv(4096).decode("ascii", errors="ignore")
+                if not data:
+                    log("dump1090 closed connection — reconnecting")
+                    sock.close()
+                    sock = open_dump1090()
+                    buf = ""
+                    continue
             except socket.timeout:
-                data = ""
+                continue
             except (socket.error, OSError) as e:
                 log(f"dump1090 connection lost: {e} — reconnecting")
                 sock.close()
@@ -211,8 +218,8 @@ def main():
                 packet = format_packet(icao, aircraft_state[icao])
                 if packet is None:
                     continue
-
                 try:
+                    print(packet.strip())
                     ser.write(packet.encode("ascii"))
                     ser.flush()
                 except serial.SerialException as e:
