@@ -24,6 +24,8 @@ static void drive_to_theta(float theta, float phi)
     uint32_t pan_pulse_ns  = angle_to_pulse_ns(theta);
     uint32_t tilt_pulse_ns = angle_to_pulse_ns(phi);
 
+    printk("%d, %d\n", pan_pulse_ns, tilt_pulse_ns);
+
     pwm_set_pulse_dt(&pwm_spec_0, pan_pulse_ns);
     pwm_set_pulse_dt(&pwm_spec_1, tilt_pulse_ns);
 }

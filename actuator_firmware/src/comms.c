@@ -30,8 +30,8 @@ int send_comms(int8_t *data, uint16_t len);
 static void adv_wq_handler(struct k_work *work);
 
 static const struct json_obj_descr angle_descr[] = {
-    JSON_OBJ_DESCR_PRIM(struct angle_struct, theta, JSON_TOK_FLOAT),
-    JSON_OBJ_DESCR_PRIM(struct angle_struct, phi, JSON_TOK_FLOAT),
+    JSON_OBJ_DESCR_PRIM(struct angle_struct, theta, JSON_TOK_FLOAT_FP),
+    JSON_OBJ_DESCR_PRIM(struct angle_struct, phi, JSON_TOK_FLOAT_FP),
 };
 
 /* Primary BLE advertising data */
@@ -59,15 +59,17 @@ static void received(struct bt_conn *conn, const void *data, uint16_t len, void 
     ARG_UNUSED(conn);
     ARG_UNUSED(ctx);
 
-    struct angle_struct* angles;
+    struct angle_struct angles = {0};
 
-    int ret = json_obj_parse(data, len,
-                         angle_descr, ARRAY_SIZE(angle_descr),
-                         &angles);
+    char buf[len + 1];
+    memcpy(buf, data, len);
+    buf[len] = '\0';
+    int ret = json_obj_parse(buf, len, angle_descr, ARRAY_SIZE(angle_descr), &angles);
+    if (ret >= 0) {
+        k_msgq_put(&servo_msgq, &angles, K_NO_WAIT);
+    }
 
-    k_msgq_put(&servo_msgq, &angles, K_NO_WAIT);
-
-    printk("%s() - Len: %d, Message: %.*s\n", __func__, len, len, (char *)data);
+    printk("%s\n", (char *)data);
 }
 
 /* Nordic UART Service callback registration */
