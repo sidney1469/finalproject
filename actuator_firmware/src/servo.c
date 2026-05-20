@@ -49,6 +49,7 @@ void servo_thread(void* a, void* b, void* c) {
 
     while(1) {
         k_msgq_get(&servo_msgq, &angles, K_FOREVER);
+        drive_to_theta(angles.theta, angles.phi);
         k_sleep(K_MSEC(100));
     }
     return;
