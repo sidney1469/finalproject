@@ -1,0 +1,7 @@
+CREATE TABLE flights (
+    id SERIAL PRIMARY KEY,
+    flightname VARCHAR(50) NOT NULL,
+    long NUMERIC(9,6) NOT NULL,
+    lat NUMERIC(8,6) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
