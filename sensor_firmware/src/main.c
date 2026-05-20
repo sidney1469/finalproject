@@ -6,44 +6,7 @@
 #include "ble_transfer.h"
 #include "gps_driver.h"
 #include "serial.h"
-
-typedef struct {
-    char icao[8];
-    double alt;
-    double lat;
-    double lon;
-    double spd;
-    double head;
-    char timestamp[16];
-} airplane_t;
-
-typedef struct {
-    gps_location_t gps;
-    airplane_t plane;
-} sensor_message_t;
-
-static const struct json_obj_descr airplane_descr[] = {
-    JSON_OBJ_DESCR_PRIM(airplane_t, icao,      JSON_TOK_STRING_BUF),
-    JSON_OBJ_DESCR_PRIM(airplane_t, alt,       JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(airplane_t, lat,       JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(airplane_t, lon,       JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(airplane_t, spd,       JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(airplane_t, head,      JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(airplane_t, timestamp, JSON_TOK_STRING_BUF),
-};
-
-static const struct json_obj_descr gps_descr[] = {
-    JSON_OBJ_DESCR_PRIM(gps_location_t, latitude,   JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(gps_location_t, longitude,  JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(gps_location_t, altitude_m, JSON_TOK_DOUBLE_FP),
-    JSON_OBJ_DESCR_PRIM(gps_location_t, valid,      JSON_TOK_TRUE),
-    JSON_OBJ_DESCR_PRIM(gps_location_t, fix_seq,    JSON_TOK_NUMBER),
-};
-
-static const struct json_obj_descr sensor_message_descr[] = {
-    JSON_OBJ_DESCR_OBJECT(sensor_message_t, gps, gps_descr),
-    JSON_OBJ_DESCR_OBJECT(sensor_message_t, plane, airplane_descr),
-};
+#include "protocol.h"
 
 static int parse_plane_csv(const char *raw, airplane_t *out)
 {
@@ -59,7 +22,7 @@ static int parse_plane_csv(const char *raw, airplane_t *out)
                          &out->lon,
                          &out->spd,
                          &out->head,
-                         out->timestamp);
+                         out->ts);
 
     return (matched == 7) ? 0 : -1;
 }
@@ -78,9 +41,9 @@ int main(void)
         return 0;
     }
     gps_location_t current_loc;
-    current_loc.latitude = -27.497358;
-    current_loc.longitude = 153.013259;
-    current_loc.altitude_m = 10.00;
+    current_loc.lat = -27.497358;
+    current_loc.lon = 153.013259;
+    current_loc.alt = 10.00;
     current_loc.valid = true;
 
     while (1) {
@@ -89,12 +52,12 @@ int main(void)
         if (new_loc.valid) {
             // Update current location with new gps info
             char msg[200];
-            current_loc.latitude = new_loc.latitude;
-            current_loc.longitude = new_loc.longitude;
-            current_loc.altitude_m = new_loc.altitude_m;
+            current_loc.lat = new_loc.lat;
+            current_loc.lon = new_loc.lon;
+            current_loc.alt = new_loc.alt;
             snprintf(msg, sizeof(msg),
                      "{\"lat\":%.6f,\"lon\":%.6f,\"alt\":%.2f}",
-                     new_loc.latitude, new_loc.longitude, new_loc.altitude_m);
+                     new_loc.lat, new_loc.lon, new_loc.alt);
             printk("Received GPS: %s\n", msg);
         } else {
             printk("Waiting for GPS fix...\n");
@@ -106,8 +69,8 @@ int main(void)
         airplane_t plane = {0};
 
         if (raw_plane_data && parse_plane_csv(raw_plane_data, &plane) == 0) {
-    //         printk("plane: %s alt=%.1f lat=%.6f lon=%.6f spd=%.1f head=%.1f ts=%s\n",
-    //    plane.icao, plane.alt, plane.lat, plane.lon, plane.spd, plane.head, plane.timestamp);
+            printk("plane: %s alt=%.1f lat=%.6f lon=%.6f spd=%.1f head=%.1f ts=%s\n",
+       plane.icao, plane.alt, plane.lat, plane.lon, plane.spd, plane.head, plane.ts);
         }
 
         sensor_message_t message = {
@@ -118,7 +81,7 @@ int main(void)
         char ble_msg[247] = {0};
 
         err = json_obj_encode_buf(sensor_message_descr,
-                                  ARRAY_SIZE(sensor_message_descr),
+                                  sensor_message_descr_len,
                                   &message,
                                   ble_msg,
                                   sizeof(ble_msg));

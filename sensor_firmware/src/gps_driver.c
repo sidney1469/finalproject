@@ -1,5 +1,6 @@
 #include "gps_driver.h"
-
+#include <stdbool.h>
+#include <stdint.h>
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
@@ -51,9 +52,9 @@ static bool nmea_to_decimal(const char *coord, const char *hemi, double *out_deg
 static void update_fix(double lat, double lon, double alt)
 {
     k_mutex_lock(&g_loc_mutex, K_FOREVER);
-    g_loc.latitude = lat;
-    g_loc.longitude = lon;
-    g_loc.altitude_m = alt;
+    g_loc.lat = lat;
+    g_loc.lon = lon;
+    g_loc.alt = alt;
     g_loc.valid = true;
     g_loc.fix_seq++;
     k_mutex_unlock(&g_loc_mutex);

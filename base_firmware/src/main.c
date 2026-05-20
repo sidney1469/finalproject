@@ -2,6 +2,9 @@
 #include <zephyr/kernel.h>
 #include <zephyr/sys/printk.h>
 #include "ble_central.h"
+#include "protocol.h"
+#include "minheap.h"
+#include <zephyr/data/json.h>
 
 #define ACTUATOR_ADDR "C1:C4:D7:FA:FB:15" // Sidney's
 #define SENSOR_ADDR                                                                                \
@@ -38,6 +41,41 @@ void my_receive_callback(const void *data, uint16_t len)
     msg.data_len = len;
     memcpy(msg.data_buffer, data, len);
     k_msgq_put(&sensor_msgq, &msg, K_NO_WAIT);
+  
+  
+    sensor_message_t received_data;
+    char buf[len + 1];
+    memcpy(buf, data, len);
+    buf[len] = '\0';
+    printk("%s\n", buf);
+    int64_t parsed = json_obj_parse(buf, len, sensor_message_descr,
+                                sensor_message_descr_len, &received_data);
+
+    if (parsed < 0) {
+        printk("json parse failed: %lld\n", parsed);
+        return;
+    }
+
+    /* Optional: require that top-level "plane" object decoded (bit1) */
+    if ((parsed & 0x2) == 0) {
+        printk("No plane object in JSON\n");
+        return;
+    }
+
+    /* Semantic guard: plane present but empty/default payload */
+    if (received_data.plane.icao[0] == '\0' ||
+        received_data.plane.ts[0] == '\0') {
+        printk("No active plane data, skipping heap insert\n");
+        return;
+    }
+
+    int rc = insert_into_heap(received_data.gps, received_data.plane);
+
+    if (rc) {
+        printk("insert_into_heap failed: %d\n", rc);
+        return;
+    }
+    convert_heap_to_string();
 }
 
 void init_bluetooth(void)
