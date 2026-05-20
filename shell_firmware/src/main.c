@@ -7,7 +7,6 @@
 /*********************************** */
 
 #include <zephyr/kernel.h>
-#include "shell.h"
 
 int main(void)
 {

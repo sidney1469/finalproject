@@ -1,9 +1,60 @@
+import asyncio
+import json
+import logging
+import random
+import string
+import time
+from contextlib import asynccontextmanager
+
+import psycopg
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from serial import Serial, SerialException
+
 from app.routers import planes
-import uvicorn
+
+logger = logging.getLogger("uvicorn.error")
+
+# ---------------------------------------------------------------------------
+# Config
+# ---------------------------------------------------------------------------
+
+PORT = "/dev/ttyACM0"
+BAUD = 115200
+POLL_INTERVAL = 1.0
+
+conn_info = "dbname=wheat_weywot user=postgres password=... host=localhost"
+
+# ---------------------------------------------------------------------------
+# Models
+# ---------------------------------------------------------------------------
+
+class Plane(BaseModel):
+    flightName: str
+    long: float
+    lat: float
+
+
+
+
+# ---------------------------------------------------------------------------
+# App
+# ---------------------------------------------------------------------------
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(planes.router)
 
@@ -11,24 +62,12 @@ app.include_router(planes.router)
 def get_health():
     return {200: "ok"}
 
-origins = [
-    "http://localhost:3000",  # Common for React
-    "http://localhost:5173",  # Common for Vue/LiveServer
-    "https://yourdomain.com", # Production domain
-]
+# ---------------------------------------------------------------------------
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,            # Allows specific origins
-    allow_credentials=True,           # Allows cookies and auth headers
-    allow_methods=["*"],              # Allows all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],              # Allows all headers
-)
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     uvicorn.run(
-            "main:app",  # Pass as a string to enable reload
-            host="localhost",
-            port=8000,
-            reload=True,
-        )
+        "main:app",
+        host="localhost",
+        port=8000,
+        reload=True,
+    )
