@@ -15,7 +15,10 @@ K_MSGQ_DEFINE(servo_msgq, sizeof(struct angle_struct), 1, 4);
 /* Maps 0-180 degrees to 1000-2000us pulse width, returned in nanoseconds */
 static uint32_t angle_to_pulse_ns(float theta)
 {
-    float pulse_us = 1000.0f + (theta / 180.0f) * 1000.0f;
+    if (theta < 0.0f) theta = 0.0f;
+    if (theta > 180.0f) theta = 180.0f;
+
+    float pulse_us = 700.0f + (theta / 180.0f) * 2000.0f;
     return (uint32_t)(pulse_us * 1000.0f);
 }
 
