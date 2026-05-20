@@ -1,5 +1,6 @@
 #include "gps_driver.h"
-
+#include <stdbool.h>
+#include <stdint.h>
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>
