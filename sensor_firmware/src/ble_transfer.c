@@ -20,7 +20,7 @@ static const struct bt_data sd[] = {
 
 static bool nus_ready = false;
 
-static int init_nus(void) {
+int init_nus(void) {
     int err;
     if (nus_ready) {
         return 0;

@@ -25,13 +25,6 @@ int serial_init(void)
     if (usb_enable(NULL) != 0) {
         return -EIO;
     }
-
-    uint32_t dtr = 0;
-    while (!dtr) {
-        (void)uart_line_ctrl_get(usb_uart, UART_LINE_CTRL_DTR, &dtr);
-        k_msleep(100);
-    }
-
     line_idx = 0;
     return 0;
 }
@@ -42,26 +35,29 @@ char *serial_read_line(void)
         return NULL;
     }
 
-    uint8_t c;
-    if (uart_poll_in(usb_uart, &c) != 0) {
-        return NULL; /* no byte available */
+    /* If host terminal is not open yet, just report no line */
+    uint32_t dtr = 0;
+    if (uart_line_ctrl_get(usb_uart, UART_LINE_CTRL_DTR, &dtr) != 0 || !dtr) {
+        return NULL;
     }
 
-    if (c == '\n' || c == '\r') {
-        if (line_idx == 0) {
-            return NULL;
+    uint8_t c;
+    while (uart_poll_in(usb_uart, &c) == 0) {
+        if (c == '\n' || c == '\r') {
+            if (line_idx == 0) {
+                continue;
+            }
+
+            line_buf[line_idx] = '\0';
+            line_idx = 0;
+            return line_buf;
         }
 
-        line_buf[line_idx] = '\0';
-        line_idx = 0;
-        return line_buf;
-    }
-
-    if (line_idx < (SERIAL_LINE_MAX - 1)) {
-        line_buf[line_idx++] = (char)c;
-    } else {
-        /* overflow: reset and start fresh */
-        line_idx = 0;
+        if (line_idx < (SERIAL_LINE_MAX - 1)) {
+            line_buf[line_idx++] = (char)c;
+        } else {
+            line_idx = 0;
+        }
     }
 
     return NULL;
