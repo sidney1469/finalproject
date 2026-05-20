@@ -28,54 +28,18 @@ struct k_thread receiver_thread_data;
 struct k_thread sender_thread_data;
 
 struct bt_data_received {
-    size_t data_len;
-    uint8_t data_buffer[256];
+    uint16_t len;
+    uint8_t data[256];
 };
 
 K_MSGQ_DEFINE(sensor_msgq, sizeof(struct bt_data_received), 10, 4);
 
 void my_receive_callback(const void *data, uint16_t len)
 {
-    printk("callback called, len=%d\n", len);  // add this
     struct bt_data_received msg;
-    msg.data_len = len;
-    memcpy(msg.data_buffer, data, len);
+    msg.len = len;
+    memcpy(msg.data, data, len);
     k_msgq_put(&sensor_msgq, &msg, K_NO_WAIT);
-  
-  
-    sensor_message_t received_data;
-    char buf[len + 1];
-    memcpy(buf, data, len);
-    buf[len] = '\0';
-    printk("%s\n", buf);
-    int64_t parsed = json_obj_parse(buf, len, sensor_message_descr,
-                                sensor_message_descr_len, &received_data);
-
-    if (parsed < 0) {
-        printk("json parse failed: %lld\n", parsed);
-        return;
-    }
-
-    /* Optional: require that top-level "plane" object decoded (bit1) */
-    if ((parsed & 0x2) == 0) {
-        printk("No plane object in JSON\n");
-        return;
-    }
-
-    /* Semantic guard: plane present but empty/default payload */
-    if (received_data.plane.icao[0] == '\0' ||
-        received_data.plane.ts[0] == '\0') {
-        printk("No active plane data, skipping heap insert\n");
-        return;
-    }
-
-    int rc = insert_into_heap(received_data.gps, received_data.plane);
-
-    if (rc) {
-        printk("insert_into_heap failed: %d\n", rc);
-        return;
-    }
-    convert_heap_to_string();
 }
 
 void init_bluetooth(void)
@@ -103,14 +67,45 @@ void control_thread(void *a, void *b, void *c)
 void receiver_thread(void *a, void *b, void *c)
 {
     printk("Receiver thread started\n");
-    struct bt_data_received msg;
+    struct bt_data_received message;
 
     while (1) {
-        k_msgq_get(&sensor_msgq, &msg, K_FOREVER);
-        char buf[257];
-        memcpy(buf, msg.data_buffer, msg.data_len);
-        buf[msg.data_len] = '\0';
-        printk("%s\n", buf);
+        k_msgq_get(&sensor_msgq, &message, K_FOREVER);
+
+        sensor_message_t received_data;
+        char buffer[257];
+        memcpy(buffer, message.data, message.len);
+        uint16_t len = message.len;
+        buffer[len] = '\0';
+        printk("%s\n", buffer);
+        int64_t parsed = json_obj_parse(buffer, len, sensor_message_descr,
+                                sensor_message_descr_len, &received_data);
+
+        if (parsed < 0) {
+            printk("json parse failed: %lld\n", parsed);
+            continue;
+        }
+
+        /* Optional: require that top-level "plane" object decoded (bit1) */
+        if ((parsed & 0x2) == 0) {
+            printk("No plane object in JSON\n");
+            continue;
+        }
+
+        /* Semantic guard: plane present but empty/default payload */
+        if (received_data.plane.icao[0] == '\0' ||
+            received_data.plane.ts[0] == '\0') {
+            printk("No active plane data, skipping heap insert\n");
+            continue;
+        }
+
+        int rc = insert_into_heap(received_data.gps, received_data.plane);
+
+        if (rc) {
+            printk("insert_into_heap failed: %d\n", rc);
+            continue;
+        }
+        convert_heap_to_string();
     }
 }
 
