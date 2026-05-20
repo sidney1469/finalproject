@@ -37,6 +37,6 @@ int insert_into_heap(const char *flightName,
                      float loclong,
                      float loclat);
 
-int convert_heap_to_string(char *json_buf, size_t json_buf_size);
+int convert_heap_to_string();
 
 #endif /* MINHEAP_H */

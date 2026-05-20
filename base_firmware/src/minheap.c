@@ -94,7 +94,7 @@ int insert_into_heap(const char *flightName,
     return 0;
 }
 
-int convert_heap_to_string(char *json_buf, size_t json_buf_size)
+int convert_heap_to_string()
 {
 
     void *elem;
@@ -115,16 +115,15 @@ int convert_heap_to_string(char *json_buf, size_t json_buf_size)
                     (double)d->latitude,
                     (double)d->loclong,
                     (double)d->loclat);
-
-
         k_msleep(20);
         index++;
     }
 
     printk("]\n");
 
-    struct HEAP_NODE *d = elem;
-
-    while (min_heap_pop(&planeheap, &d)){ /*Empty Minheap*/}
+    struct HEAP_NODE out;
+    while (min_heap_pop(&planeheap, &out) == 0) {
+        /* popped one */
+    }
     return 0;
 }
