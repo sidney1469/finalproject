@@ -59,6 +59,25 @@ static void update_fix(double lat, double lon, double alt)
     k_mutex_unlock(&g_loc_mutex);
 }
 
+static char *next_csv_field(char **s)
+{
+    if (!s || !*s) {
+        return NULL;
+    }
+
+    char *start = *s;
+    char *comma = strchr(start, ',');
+
+    if (comma) {
+        *comma = '\0';
+        *s = comma + 1;
+    } else {
+        *s = NULL;
+    }
+
+    return start;
+}
+
 /* Minimal: only accept GNGGA sentences */
 static void parse_gngga(char *s)
 {
@@ -66,20 +85,20 @@ static void parse_gngga(char *s)
         s++;
     }
 
-    char *type = strsep(&s, ",");
+    char *type = next_csv_field(&s);
     if (!type || strcmp(type, "GNGGA") != 0) {
         return;
     }
 
-    (void)strsep(&s, ",");   /* time */
-    char *lat      = strsep(&s, ",");
-    char *lat_hemi = strsep(&s, ",");
-    char *lon      = strsep(&s, ",");
-    char *lon_hemi = strsep(&s, ",");
-    char *fix_q    = strsep(&s, ",");
-    (void)strsep(&s, ",");   /* sats */
-    (void)strsep(&s, ",");   /* hdop */
-    char *alt      = strsep(&s, ",");
+    (void)next_csv_field(&s);   /* time */
+    char *lat      = next_csv_field(&s);
+    char *lat_hemi = next_csv_field(&s);
+    char *lon      = next_csv_field(&s);
+    char *lon_hemi = next_csv_field(&s);
+    char *fix_q    = next_csv_field(&s);
+    (void)next_csv_field(&s);   /* sats */
+    (void)next_csv_field(&s);   /* hdop */
+    char *alt      = next_csv_field(&s);
 
     if (!fix_q || fix_q[0] == '0') {
         return;

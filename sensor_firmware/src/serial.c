@@ -26,7 +26,6 @@ int serial_init(void)
         return -EIO;
     }
 
-    /* Optional but useful: wait for terminal to open port (DTR) */
     uint32_t dtr = 0;
     while (!dtr) {
         (void)uart_line_ctrl_get(usb_uart, UART_LINE_CTRL_DTR, &dtr);
