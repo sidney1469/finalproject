@@ -291,10 +291,9 @@ def insert_planes() -> None:
         while port.in_waiting:
             line = port.readline()
                 #print("RX:", line.decode(errors="replace").strip())
-            line = (line.decode(errors="replace").strip()[0])
-            if line[0] == '[' or line[0] == ',':
-                return line
-            return ''
+            line = (line.decode(errors="replace").strip())
+            logger.info(line)
+            return line
 
     def read_for(port, duration=2.0):
         """Read and print all lines received within `duration` seconds."""
@@ -303,7 +302,7 @@ def insert_planes() -> None:
             return line.decode(errors="replace").strip()
 
 
-    #logger.info("here")
+    logger.info("here")
     try:
         with Serial(
             PORT,
@@ -317,32 +316,9 @@ def insert_planes() -> None:
 
             port.reset_input_buffer()
             port.reset_output_buffer()
-
-            for i in range(NUM_PLANES):
-                #logger.info("Here")
-                flight_name = random_flight_name()
-                longitude = random_coord()
-                latitude  = random_coord()
-                loclong   = random_coord()
-                loclat    = random_coord()
-
-                command = (
-                    f"plane add {flight_name} "
-                    f"{longitude} {latitude} "
-                    f"{loclong} {loclat}\r\n"
-                )
-
-                port.write(command.encode())
-
-                # Give Zephyr shell time to process, then drain echo/response
-                line = read_available(port, settle=0.01)
-                logger.info(line)
-
-            print("\nQuerying heap...\n")
             port.write(b"plane print\r\n")
             line = read_for(port, duration=2.0)
-
-            logger.info("here: " + line)
+            logger.info(line)
 
     except SerialException as e:
         print(f"Could not open {PORT}: {e}")
